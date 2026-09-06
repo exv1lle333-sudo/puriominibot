@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Purio App</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<div id="toast" class="toast"></div>
+
+<div class="app">
+
+  <!-- ===== HEADER ===== -->
+  <header class="topbar">
+    <div class="topbar-dragon" id="topDragon">
+      <svg viewBox="0 0 64 64" class="dragon-mini"><use href="#dragon-svg"/></svg>
+      <span class="lvl-chip" id="topLevel">1</span>
+    </div>
+    <div class="topbar-title">
+      <div class="brand">Purio<span>App</span></div>
+      <div class="sub" id="topSubStatus">проверка подписки…</div>
+    </div>
+    <div class="points-pill" id="topPoints">
+      <span class="coin">✦</span><span id="topPointsValue">0</span>
+    </div>
+  </header>
+
+  <main class="content" id="content">
+
+    <!-- ===== HOME ===== -->
+    <section class="page active" id="page-home">
+
+      <div class="card dragon-card">
+        <div class="dragon-stage" id="dragonStage">
+          <svg viewBox="0 0 200 200" class="dragon-big" id="dragonBig"><use href="#dragon-svg"/></svg>
+          <svg class="level-ring" viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="52" class="ring-bg"/>
+            <circle cx="60" cy="60" r="52" class="ring-fg" id="ringFg"/>
+          </svg>
+        </div>
+        <div class="dragon-info">
+          <div class="dragon-name">Пурио <span id="homeLevelText">· Ур. 1</span></div>
+          <div class="xp-bar"><div class="xp-fill" id="xpFill"></div></div>
+          <div class="xp-text" id="xpText">0 / 100 XP</div>
+        </div>
+      </div>
+
+      <div class="card streak-card">
+        <div class="card-title">🔥 Серия входов <span class="muted" id="streakWeekLabel"></span></div>
+        <div class="streak-row" id="streakRow"></div>
+        <div class="streak-hint" id="streakHint">Заходи каждый день — награда растёт всю неделю!</div>
+      </div>
+
+      <div class="grid2">
+        <div class="card mini-stat">
+          <div class="mini-stat-icon">🌐</div>
+          <div class="mini-stat-val" id="homeVpnHours">0ч</div>
+          <div class="mini-stat-label">VPN за неделю</div>
+        </div>
+        <div class="card mini-stat">
+          <div class="mini-stat-icon">✦</div>
+          <div class="mini-stat-val" id="homeVpnPoints">0</div>
+          <div class="mini-stat-label">поинтов от VPN</div>
+        </div>
+      </div>
+
+      <div class="card tasks-teaser" id="tasksTeaser" onclick="Nav.go('tasks')">
+        <div class="card-title">📋 Задания на сегодня</div>
+        <div id="teaserList" class="teaser-list">Загрузка…</div>
+        <div class="teaser-more">Открыть все задания →</div>
+      </div>
+
+    </section>
+
+    <!-- ===== TASKS ===== -->
+    <section class="page" id="page-tasks">
+      <div class="page-title">📋 Задания дня</div>
+      <div class="page-subtitle">Обновляются каждый день в 00:00 UTC</div>
+      <div id="tasksList" class="tasks-list"></div>
+    </section>
+
+    <!-- ===== VPN ===== -->
+    <section class="page" id="page-vpn">
+      <div class="page-title">🌐 Мой VPN</div>
+
+      <div class="card sub-card" id="subCard">
+        <div class="sub-status" id="subStatusLine">—</div>
+        <div class="sub-actions" id="subActions"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📈 Активность за неделю</div>
+        <canvas id="vpnChart" width="300" height="120"></canvas>
+        <div class="chart-legend">часы онлайн по дням · 2 поинта / час</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">💳 Тарифы</div>
+        <div id="tariffsList" class="tariffs-list">Загрузка…</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🎟 Промокод</div>
+        <div class="promo-row">
+          <input id="promoInput" placeholder="Введи промокод" autocapitalize="characters">
+          <button id="promoBtn" class="btn btn-secondary">Активировать</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== CASINO ===== -->
+    <section class="page" id="page-casino">
+      <div class="page-title">🎰 Purio Casino</div>
+      <div class="casino-balance">Баланс: <span class="coin">✦</span><span id="casinoBalance">0</span></div>
+
+      <div class="tabs-switch">
+        <button class="tswitch active" data-game="dice">🎲 Кости</button>
+        <button class="tswitch" data-game="slots">🎰 Слоты</button>
+      </div>
+
+      <!-- DICE -->
+      <div class="game-panel active" id="game-dice">
+        <div class="card dice-card">
+          <div class="dice-track">
+            <div class="dice-fill" id="diceFill"></div>
+            <div class="dice-marker" id="diceMarker"></div>
+            <div class="dice-roll-value" id="diceRollValue"></div>
+          </div>
+          <div class="dice-controls">
+            <div class="control-row">
+              <span>Шанс выигрыша</span><span id="diceChanceVal">50%</span>
+            </div>
+            <input type="range" id="diceChance" min="2" max="95" value="50">
+            <div class="control-row">
+              <span>Множитель</span><span id="diceMultVal">x1.98</span>
+            </div>
+          </div>
+          <div class="bet-row">
+            <div class="bet-input-wrap">
+              <span class="coin">✦</span>
+              <input type="number" id="diceBet" value="10" min="1">
+            </div>
+            <div class="bet-quick" id="diceBetQuick"></div>
+          </div>
+          <button class="btn btn-primary btn-big" id="diceRollBtn">🎲 Бросить кости</button>
+        </div>
+      </div>
+
+      <!-- SLOTS -->
+      <div class="game-panel" id="game-slots">
+        <div class="card slots-card">
+          <div class="reels" id="reels">
+            <div class="reel" id="reel0">🍀</div>
+            <div class="reel" id="reel1">🍀</div>
+            <div class="reel" id="reel2">🍀</div>
+          </div>
+          <div class="slot-result" id="slotResult">Крути барабаны!</div>
+          <div class="bet-row">
+            <div class="bet-input-wrap">
+              <span class="coin">✦</span>
+              <input type="number" id="slotBet" value="10" min="1">
+            </div>
+            <div class="bet-quick" id="slotBetQuick"></div>
+          </div>
+          <button class="btn btn-primary btn-big" id="slotSpinBtn">🎰 Крутить</button>
+          <div class="paytable" id="paytable"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🕘 История ставок</div>
+        <div id="casinoHistory" class="casino-history"></div>
+      </div>
+    </section>
+
+    <!-- ===== PROFILE ===== -->
+    <section class="page" id="page-profile">
+      <div class="page-title">👤 Профиль</div>
+
+      <div class="card profile-card">
+        <div class="profile-row"><span>Баланс</span><b id="profBalance">0 ₽</b></div>
+        <div class="profile-row"><span>Подписка</span><b id="profSub">—</b></div>
+        <div class="profile-row"><span>Уровень дракона</span><b id="profLevel">1</b></div>
+        <div class="profile-row"><span>Purio Points</span><b id="profPoints">0</b></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🐉 Скины дракона</div>
+        <div id="skinsGrid" class="skins-grid"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🤝 Рефералы</div>
+        <div class="profile-row"><span>Приглашено</span><b id="refCount">0</b></div>
+        <div class="profile-row"><span>Купили подписку</span><b id="refPaid">0</b></div>
+        <div class="profile-row"><span>Заработано</span><b id="refEarned">0 ₽</b></div>
+        <div class="ref-link-row">
+          <input id="refLinkInput" readonly>
+          <button class="btn btn-secondary" id="refCopyBtn">Копировать</button>
+        </div>
+      </div>
+
+      <div class="card soon-card">
+        <div class="card-title">🛍 Purio Shop</div>
+        <div class="soon-badge">В разработке</div>
+        <div class="muted small">Скины, украшения и предметы для дракона появятся здесь совсем скоро.</div>
+      </div>
+
+      <div class="card soon-card">
+        <div class="card-title">🎁 Обмен на подарки</div>
+        <div class="soon-badge">В разработке</div>
+        <div class="muted small">Копи Purio Points — скоро их можно будет обменять на подарки и призы.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🆘 Поддержка</div>
+        <div class="support-row">
+          <a class="btn btn-secondary" id="supportLink" href="#" target="_blank">Написать в поддержку</a>
+          <a class="btn btn-secondary" id="channelLink" href="#" target="_blank">Наш канал</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===== BOTTOM NAV ===== -->
+  <nav class="bottom-nav">
+    <button class="nav-btn active" data-page="home"><span class="nav-ico">🏠</span><span>Главная</span></button>
+    <button class="nav-btn" data-page="tasks"><span class="nav-ico">📋</span><span>Задания</span></button>
+    <button class="nav-btn" data-page="vpn"><span class="nav-ico">🌐</span><span>VPN</span></button>
+    <button class="nav-btn" data-page="casino"><span class="nav-ico">🎰</span><span>Казино</span></button>
+    <button class="nav-btn" data-page="profile"><span class="nav-ico">👤</span><span>Профиль</span></button>
+  </nav>
+</div>
+
+<!-- Purple dragon mascot, reused everywhere via <use> -->
+<svg style="position:absolute;width:0;height:0" aria-hidden="true">
+  <defs>
+    <symbol id="dragon-svg" viewBox="0 0 200 200">
+      <defs>
+        <linearGradient id="dgrad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#c084fc"/>
+          <stop offset="100%" stop-color="#7c3aed"/>
+        </linearGradient>
+      </defs>
+      <ellipse cx="100" cy="120" rx="55" ry="46" fill="url(#dgrad)"/>
+      <ellipse cx="70" cy="60" rx="34" ry="30" fill="url(#dgrad)"/>
+      <path d="M45 40 Q35 15 55 25 Q52 40 45 40Z" fill="#a855f7"/>
+      <path d="M95 35 Q100 10 115 28 Q105 40 95 35Z" fill="#a855f7"/>
+      <circle cx="58" cy="55" r="6" fill="#1b0f2e"/>
+      <circle cx="60" cy="53" r="2" fill="#fff"/>
+      <path d="M40 70 Q50 78 60 70" stroke="#3b0764" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M150 130 Q180 110 175 90 Q160 100 150 120Z" fill="#a855f7"/>
+      <path d="M100 160 Q95 185 110 190 Q120 178 112 160Z" fill="#7c3aed"/>
+      <ellipse cx="60" cy="120" rx="16" ry="10" fill="#e9d5ff" opacity="0.85"/>
+      <ellipse cx="135" cy="120" rx="16" ry="10" fill="#e9d5ff" opacity="0.85"/>
+    </symbol>
+  </defs>
+</svg>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
