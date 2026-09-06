@@ -23,6 +23,7 @@ from config import (
     BOT_USERNAME,
 )
 from webapp import gamedb, casino
+from webapp import admin
 from webapp.telegram_auth import validate_init_data
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
@@ -348,6 +349,7 @@ async def cors_middleware(request: web.Request, handler):
 
 def create_app() -> web.Application:
     app = web.Application(middlewares=[cors_middleware])
+    admin.setup_admin_routes(app)
 
     app.router.add_post("/api/auth", api_auth)
     app.router.add_get("/api/state", api_state)
