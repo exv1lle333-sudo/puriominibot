@@ -338,6 +338,25 @@ function betQuickButtons(containerId, inputId, balanceGetter) {
 
 let casinoBalance = 0;
 
+// Для краша — упрощённый набор кнопок ставки: половина / удвоить / всё,
+// вместо четырёх произвольных "+10/+50/+100/MAX". Меньше кнопок и понятнее
+// логика (стандартная схема для крash-игр).
+function crashQuickBetButtons() {
+  const el = document.getElementById("crashBetQuick");
+  el.innerHTML = "";
+  const input = document.getElementById("crashBet");
+  [
+    { label: "½", apply: () => Math.max(1, Math.floor((Number(input.value) || 0) / 2)) },
+    { label: "2×", apply: () => Math.max(1, Math.floor((Number(input.value) || 0) * 2)) },
+    { label: "MAX", apply: () => Math.max(1, Math.floor(casinoBalance)) },
+  ].forEach(({ label, apply }) => {
+    const b = document.createElement("button");
+    b.textContent = label;
+    b.addEventListener("click", () => { input.value = apply(); });
+    el.appendChild(b);
+  });
+}
+
 async function loadCasino() {
   const data = await api("/api/casino/state");
   casinoBalance = data.points;
@@ -346,7 +365,7 @@ async function loadCasino() {
   betQuickButtons("diceBetQuick", "diceBet", () => casinoBalance);
   betQuickButtons("slotBetQuick", "slotBet", () => casinoBalance);
   betQuickButtons("coinBetQuick", "coinBet", () => casinoBalance);
-  betQuickButtons("crashBetQuick", "crashBet", () => casinoBalance);
+  crashQuickBetButtons();
   renderPaytable();
   await resumeCrashRound();
 }
@@ -500,7 +519,10 @@ document.getElementById("coinFlipBtn").addEventListener("click", async () => {
 let crashRoundId = null;
 let crashStartedAt = null;
 let crashAnimHandle = null;
+let crashPollHandle = null;
+let crashResolving = false;
 const CRASH_GROWTH_RATE = 0.08; // должно совпадать с CRASH_GROWTH_RATE на бэкенде
+const CRASH_POLL_MS = 300; // как часто сверяемся с сервером, взорвался ли раунд
 
 function crashMultAt(elapsedSec) {
   return Math.min(1000, Math.exp(CRASH_GROWTH_RATE * Math.max(0, elapsedSec)));
@@ -560,6 +582,36 @@ function stopCrashAnim() {
   crashAnimHandle = null;
 }
 
+// Пока раунд активен, регулярно спрашиваем сервер "уже рвануло?".
+// Раньше клиент просто рисовал график по локальному таймеру и ничего
+// не проверял — из-за этого он мог расти сколько угодно, а реальный
+// результат вскрывался только по клику "Забрать". Теперь взрыв
+// подхватывается сам, в момент, когда он реально произошёл на сервере.
+function startCrashPolling() {
+  stopCrashPolling();
+  crashPollHandle = setInterval(async () => {
+    if (!crashRoundId || crashResolving) return;
+    try {
+      const { round } = await api("/api/casino/crash/state");
+      if (round && round.busted) {
+        await finishCrashRound(true);
+      } else if (!round) {
+        // раунд уже закрыт где-то ещё — просто синхронизируем интерфейс
+        stopCrashPolling();
+        stopCrashAnim();
+        crashRoundId = null;
+        crashStartedAt = null;
+        setCrashUi("idle");
+      }
+    } catch (e) { /* сеть моргнула — попробуем на следующем тике */ }
+  }, CRASH_POLL_MS);
+}
+
+function stopCrashPolling() {
+  if (crashPollHandle) clearInterval(crashPollHandle);
+  crashPollHandle = null;
+}
+
 function setCrashUi(state) {
   const startBtn = document.getElementById("crashStartBtn");
   const cashoutBtn = document.getElementById("crashCashoutBtn");
@@ -587,6 +639,11 @@ async function resumeCrashRound() {
       setCrashUi("running");
       stopCrashAnim();
       crashAnimLoop();
+      if (round.busted) {
+        await finishCrashRound(true);
+      } else {
+        startCrashPolling();
+      }
     } else {
       crashRoundId = null;
       crashStartedAt = null;
@@ -608,6 +665,7 @@ document.getElementById("crashStartBtn").addEventListener("click", async () => {
     setCrashUi("running");
     stopCrashAnim();
     crashAnimLoop();
+    startCrashPolling();
     haptic("light");
   } catch (e) {
     haptic("error");
@@ -618,7 +676,16 @@ document.getElementById("crashStartBtn").addEventListener("click", async () => {
 });
 
 document.getElementById("crashCashoutBtn").addEventListener("click", async () => {
-  if (!crashRoundId) return;
+  await finishCrashRound(false);
+});
+
+// Единая точка завершения раунда — вызывается и по клику "Забрать",
+// и автоматически, как только опрос сервера покажет, что график взорвался.
+// autoBust=true — раунд закрылся сам, без ручного клика игрока.
+async function finishCrashRound(autoBust) {
+  if (!crashRoundId || crashResolving) return;
+  crashResolving = true;
+  stopCrashPolling();
   const btn = document.getElementById("crashCashoutBtn");
   btn.disabled = true;
   try {
@@ -635,10 +702,16 @@ document.getElementById("crashCashoutBtn").addEventListener("click", async () =>
       drawCrashGraph((Date.now() - crashStartedAt) / 1000, false);
       haptic("success");
     } else {
-      label.textContent = (res.crash_point || res.multiplier).toFixed(2) + "x 💥";
+      const point = res.crash_point || res.multiplier;
+      // рисуем график ровно до точки взрыва, а не до момента, когда мы её заметили —
+      // так анимация на экране совпадает с реальным результатом сервера
+      const elapsedAtPoint = Math.log(Math.max(1, point)) / CRASH_GROWTH_RATE;
+      label.textContent = point.toFixed(2) + "x 💥";
       label.className = "crash-mult busted";
-      document.getElementById("crashStatus").textContent = `Взорвался на ${(res.crash_point || res.multiplier).toFixed(2)}x. -${res.bet} ✦`;
-      drawCrashGraph((Date.now() - crashStartedAt) / 1000, true);
+      document.getElementById("crashStatus").textContent = autoBust
+        ? `Взорвался на ${point.toFixed(2)}x — не успел забрать. -${res.bet} ✦`
+        : `Взорвался на ${point.toFixed(2)}x. -${res.bet} ✦`;
+      drawCrashGraph(elapsedAtPoint, true);
       haptic("error");
     }
 
@@ -651,11 +724,15 @@ document.getElementById("crashCashoutBtn").addEventListener("click", async () =>
     await loadState();
   } catch (e) {
     haptic("error");
-    toast(e.message);
+    if (!autoBust) toast(e.message);
+    crashResolving = false; // снимаем блокировку до ресинка, иначе resumeCrashRound не сможет доработать
+    // раунд мог уже закрыться параллельным запросом — просто сверим состояние
+    await resumeCrashRound();
   } finally {
     btn.disabled = false;
+    crashResolving = false;
   }
-});
+}
 
 // ===================== TAPALKA (Purio Tap) =====================
 let tapState = null;

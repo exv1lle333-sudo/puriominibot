@@ -894,18 +894,26 @@ async def crash_cashout(user_id: int, round_id: int) -> dict:
 
 async def get_crash_round_state(user_id: int) -> dict | None:
     """Текущее состояние активного раунда — для синхронизации графика на клиенте
-    (не раскрывает crash_point, пока раунд не завершён)."""
+    (не раскрывает crash_point, пока раунд не завершён).
+
+    `busted` — сработала ли точка взрыва к текущему моменту. Само число
+    crash_point всё ещё не отдаётся клиенту заранее — только факт "уже
+    рвануло или нет", ровно в момент, когда это произошло на сервере.
+    Клиент использует это поле, чтобы сразу остановить график и не ждать,
+    пока игрок сам нажмёт «Забрать»."""
     r = await get_active_crash_round(user_id)
     if not r:
         return None
     now = _now()
     elapsed = now - r["started_at"]
+    current_mult = casino.crash_multiplier_at(elapsed)
     return {
         "round_id": r["id"],
         "bet": r["bet"],
         "started_at": r["started_at"],
         "elapsed": elapsed,
-        "multiplier": round(casino.crash_multiplier_at(elapsed), 2),
+        "multiplier": round(current_mult, 2),
+        "busted": current_mult >= r["crash_point"],
     }
 
 
