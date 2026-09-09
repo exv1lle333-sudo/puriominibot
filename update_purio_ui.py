@@ -1,0 +1,941 @@
+from pathlib import Path
+from datetime import datetime
+import re
+import shutil
+
+ROOT = Path(__file__).resolve().parent
+STATIC = ROOT / "webapp" / "static"
+MARKER = "/* PURIO_UI_V3 */"
+
+
+def replace_once(text, old, new, label):
+    count = text.count(old)
+    if count != 1:
+        raise RuntimeError(
+            f"{label}: ожидалось одно совпадение, найдено {count}. "
+            "Файлы отличаются от присланной версии. Изменения отменены."
+        )
+    return text.replace(old, new, 1)
+
+
+def replace_between(text, start, end, new, label):
+    if text.count(start) != 1 or text.count(end) != 1:
+        raise RuntimeError(f"{label}: не удалось однозначно найти границы.")
+    a = text.index(start)
+    b = text.index(end, a)
+    return text[:a] + new + "\n\n" + text[b:]
+
+
+DRAGON = r'''
+<symbol id="dragon-svg" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="purioBody" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#cf9bff"/>
+      <stop offset="48%" stop-color="#9954ef"/>
+      <stop offset="100%" stop-color="#6526b9"/>
+    </linearGradient>
+    <linearGradient id="purioBelly" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f2dcff"/>
+      <stop offset="100%" stop-color="#c6a0f4"/>
+    </linearGradient>
+    <linearGradient id="purioWing" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#bb76f9"/>
+      <stop offset="100%" stop-color="#582599"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Хвост и крылья — за телом -->
+  <path d="M128 157 Q179 180 181 128 Q195 161 171 178
+           Q146 191 119 170Z"
+        fill="url(#purioBody)" stroke="#572493" stroke-width="3"/>
+  <path d="M177 137 L175 124 L185 128Z" fill="#e7c5ff"/>
+
+  <g stroke="#652ca3" stroke-width="3" stroke-linejoin="round">
+    <path d="M61 117 Q34 82 15 83 L20 116 L32 110
+             L38 132 L48 121 L63 139Z" fill="url(#purioWing)"/>
+    <path d="M139 117 Q166 82 185 83 L180 116 L168 110
+             L162 132 L152 121 L137 139Z" fill="url(#purioWing)"/>
+    <path d="M59 127 L25 94 M141 127 L175 94"
+          fill="none" stroke="#d19aff" stroke-width="2"/>
+  </g>
+
+  <!-- Тело и живот -->
+  <ellipse cx="100" cy="139" rx="44" ry="43"
+           fill="url(#purioBody)" stroke="#652ca3" stroke-width="3"/>
+  <ellipse cx="100" cy="146" rx="27" ry="29" fill="url(#purioBelly)"/>
+  <path d="M80 139 Q100 146 120 139 M77 150 Q100 158 123 150
+           M83 162 Q100 167 117 162"
+        fill="none" stroke="#b88cdf" stroke-width="2"/>
+
+  <!-- Лапы -->
+  <g fill="url(#purioBody)" stroke="#652ca3" stroke-width="3">
+    <ellipse cx="64" cy="135" rx="13" ry="21" transform="rotate(25 64 135)"/>
+    <ellipse cx="136" cy="135" rx="13" ry="21" transform="rotate(-25 136 135)"/>
+    <ellipse cx="75" cy="177" rx="23" ry="13"/>
+    <ellipse cx="125" cy="177" rx="23" ry="13"/>
+  </g>
+  <g stroke="#f4e5ff" stroke-width="4" stroke-linecap="round">
+    <path d="M63 180 L63 183 M73 182 L73 185 M83 181 L83 184"/>
+    <path d="M117 181 L117 184 M127 182 L127 185 M137 180 L137 183"/>
+  </g>
+
+  <!-- Уши и рога -->
+  <path d="M56 59 L31 43 Q30 69 51 77
+           M144 59 L169 43 Q170 69 149 77"
+        fill="#a76bea" stroke="#652ca3" stroke-width="3"/>
+  <path d="M62 47 Q52 27 64 14 Q65 32 78 38
+           M122 38 Q135 32 136 14 Q148 27 138 47"
+        fill="#f4dba8" stroke="#a575b0" stroke-width="2.5"/>
+
+  <!-- Большая голова -->
+  <path d="M48 70 Q48 35 100 35 Q152 35 152 70
+           L151 87 Q148 116 100 119 Q52 116 49 87Z"
+        fill="url(#purioBody)" stroke="#652ca3" stroke-width="3"/>
+  <path d="M90 39 L100 24 L110 39 L100 47Z" fill="#dfb3ff"/>
+  <path d="M62 55 Q76 43 86 46" fill="none"
+        stroke="#e7c7ff" stroke-width="5" stroke-linecap="round" opacity=".65"/>
+
+  <!-- Глаза -->
+  <ellipse cx="77" cy="74" rx="15" ry="19" fill="#fff8ff"/>
+  <ellipse cx="123" cy="74" rx="15" ry="19" fill="#fff8ff"/>
+  <ellipse cx="81" cy="77" rx="9" ry="13" fill="#352050"/>
+  <ellipse cx="119" cy="77" rx="9" ry="13" fill="#352050"/>
+  <circle cx="84" cy="71" r="4" fill="white"/>
+  <circle cx="122" cy="71" r="4" fill="white"/>
+  <circle cx="78" cy="82" r="2" fill="#d2a3ff"/>
+  <circle cx="116" cy="82" r="2" fill="#d2a3ff"/>
+
+  <!-- Мордочка -->
+  <ellipse cx="100" cy="99" rx="32" ry="19" fill="#d4a4f5"/>
+  <ellipse cx="88" cy="93" rx="3" ry="2.5" fill="#79459c"/>
+  <ellipse cx="112" cy="93" rx="3" ry="2.5" fill="#79459c"/>
+  <path d="M85 103 Q100 114 115 103" fill="none"
+        stroke="#5a287d" stroke-width="3" stroke-linecap="round"/>
+  <path d="M88 105 L92 112 L96 108" fill="#fff9ec"/>
+  <ellipse cx="59" cy="93" rx="8" ry="4" fill="#f498db" opacity=".55"/>
+  <ellipse cx="141" cy="93" rx="8" ry="4" fill="#f498db" opacity=".55"/>
+</symbol>
+'''
+
+
+VISUALS = r'''
+// Аксессуары рисуются отдельно от тела: фильтр скина их не перекрашивает.
+const PURIO_CLOTHES = {
+  cloth_scarf_red: {
+    front: `
+      <path d="M111 118 L132 123 L126 157 L113 151Z"
+            fill="#db274d" stroke="#921b3b" stroke-width="2"/>
+      <path d="M65 109 Q100 123 135 109 L136 121
+               Q100 139 64 121Z"
+            fill="#fa4560" stroke="#a02041" stroke-width="2"/>
+      <path d="M70 115 Q100 128 129 115"
+            fill="none" stroke="#ff98a5" stroke-width="3"/>
+      <path d="M116 144 L128 149 M115 149 L127 154"
+            stroke="#ffadb6" stroke-width="2"/>
+    `
+  },
+  cloth_glasses: {
+    front: `
+      <g fill="#21182f" stroke="#e1cef5" stroke-width="3">
+        <path d="M59 64 L94 64 L91 83 Q76 94 62 81Z"/>
+        <path d="M106 64 L141 64 L138 81 Q124 94 109 83Z"/>
+      </g>
+      <path d="M94 69 Q100 64 106 69 M51 64 L59 67 M141 67 L149 64"
+            fill="none" stroke="#eee0ff" stroke-width="3"/>
+      <path d="M67 69 L78 82 M115 69 L126 82"
+            stroke="#9786bd" stroke-width="3"/>
+    `
+  },
+  cloth_pilot_cap: {
+    front: `
+      <path d="M60 49 Q64 23 102 24 Q139 26 143 51Z"
+            fill="#4756c5" stroke="#283477" stroke-width="2"/>
+      <path d="M58 49 Q107 39 145 49 L151 56 Q102 51 58 58Z"
+            fill="#7787f4" stroke="#283477" stroke-width="2"/>
+      <path d="M96 27 L103 43" stroke="#a9b8ff" stroke-width="3"/>
+      <circle cx="115" cy="37" r="6" fill="#f9d578"/>
+    `
+  },
+  cloth_cape_hero: {
+    back: `
+      <path d="M64 109 Q100 119 136 109 L158 179
+               Q125 169 100 184 Q75 169 42 179Z"
+            fill="#d02d64" stroke="#861743" stroke-width="3"/>
+      <path d="M72 119 L60 167 M128 119 L140 167"
+            stroke="#f56a95" stroke-width="3"/>
+    `,
+    front: `<circle cx="100" cy="119" r="6" fill="#ffda75"
+                    stroke="#b67d28" stroke-width="2"/>`
+  },
+  cloth_crown_mini: {
+    front: `
+      <path d="M72 42 L67 18 L87 29 L100 9 L113 29 L133 18 L128 42Z"
+            fill="#ffce50" stroke="#b27b22" stroke-width="2"/>
+      <path d="M73 39 L127 39 L125 48 L75 48Z"
+            fill="#ffe28e" stroke="#b27b22" stroke-width="2"/>
+      <path d="M100 26 L105 33 L100 40 L95 33Z" fill="#c142eb"/>
+      <circle cx="80" cy="34" r="3" fill="#f05c7e"/>
+      <circle cx="120" cy="34" r="3" fill="#65dceb"/>
+    `
+  },
+  cloth_armor_gold: {
+    front: `
+      <path d="M72 122 L85 116 Q100 127 115 116 L128 122
+               L123 159 L100 173 L77 159Z"
+            fill="#e9b844" stroke="#946122" stroke-width="3"/>
+      <path d="M100 126 L100 163 M80 142 L120 142"
+            stroke="#ffe6a0" stroke-width="3"/>
+      <path d="M100 132 L107 142 L100 153 L93 142Z"
+            fill="#9b4de0" stroke="#ffe49a" stroke-width="2"/>
+      <path d="M53 120 Q65 111 77 120 L72 133 L53 133Z
+               M123 120 Q135 111 147 120 L147 133 L128 133Z"
+            fill="#ffdb77" stroke="#946122" stroke-width="2"/>
+    `
+  },
+  cloth_wings_ice: {
+    back: `
+      <g fill="#a5efff" stroke="#4ca0dc" stroke-width="2">
+        <path d="M66 136 L8 73 L15 114 L28 108 L30 139
+                 L43 126 L49 153Z"/>
+        <path d="M134 136 L192 73 L185 114 L172 108 L170 139
+                 L157 126 L151 153Z"/>
+      </g>
+      <path d="M62 135 L16 88 M138 135 L184 88"
+            stroke="#efffff" stroke-width="3"/>
+    `
+  }
+};
+
+function applyEquippedSkinVisuals(skinCode) {
+  const clothing = STATE?.cosmetics?.equipped?.clothing || "";
+  const art = PURIO_CLOTHES[clothing] || {};
+  const filter = SKIN_FILTERS[skinCode] || "";
+  [
+    document.getElementById("dragonBig"),
+    document.getElementById("tapDragon"),
+    document.querySelector("#topDragon .dragon-mini"),
+  ].forEach(el => {
+    if (!el) return;
+    el.setAttribute("viewBox", "0 0 200 200");
+
+    // Только константная SVG-разметка. Данные API не вставляются в HTML.
+    const key = skinCode + "|" + clothing;
+    if (el.dataset.purioLook === key) return;
+    el.dataset.purioLook = key;
+    el.style.removeProperty("filter");
+    el.innerHTML = `
+      <g class="purio-accessory">${art.back || ""}</g>
+      <g class="purio-body"><use href="#dragon-svg"/></g>
+      <g class="purio-accessory">${art.front || ""}</g>
+    `;
+    el.querySelector(".purio-body").style.filter = filter || "none";
+  });
+}
+'''
+
+
+NAV = r'''
+const Nav = {
+  async go(page) {
+    if (page === "tap") page = "home";
+    const target = document.getElementById("page-" + page);
+    if (!target) {
+      toast("Раздел не найден");
+      return;
+    }
+    haptic();
+    document.querySelectorAll(".page").forEach(p => {
+      p.classList.toggle("active", p === target);
+    });
+    const parent = {
+      tasks: "home",
+      casino: "home",
+      shop: "profile",
+    }[page] || page;
+    document.querySelectorAll(".nav-btn").forEach(b => {
+      const active = b.dataset.page === parent;
+      b.classList.toggle("active", active);
+      if (active) b.setAttribute("aria-current", "page");
+      else b.removeAttribute("aria-current");
+    });
+    window.scrollTo({ top: 0, behavior: "auto" });
+    try {
+      if (page === "home") {
+        await loadState();
+        await loadTap();
+      }
+      if (page === "tasks") await loadTasks();
+      if (page === "vpn") await loadVpn();
+      if (page === "casino") await loadCasino();
+      if (page === "profile") await loadProfile();
+      if (page === "shop") await loadShop();
+    } catch (e) {
+      toast(e.message || "Не удалось загрузить раздел");
+    }
+  }
+};
+document.querySelectorAll(".nav-btn").forEach(btn => {
+  btn.addEventListener("click", () => Nav.go(btn.dataset.page));
+});
+'''
+
+
+TAP = r'''
+// Серверное состояние + очередь ещё не отправленных тапов.
+// Запросы на начисление не повторяются автоматически: это могло бы
+// удвоить награду, если сервер обработал запрос, но ответ потерялся.
+let tapState = null;
+let tapLocalEnergy = 0;
+let tapQueue = 0;
+let tapFlushTimer = null;
+let tapTicker = null;
+let tapFlushing = false;
+let tapLoading = false;
+let tapInFlight = 0;
+let tapLastTick = performance.now();
+let tapPulseTimer = null;
+
+function tapCanEarn(points = tapState?.day_points || 0) {
+  if (!tapState) return false;
+  return tapState.day_cap - points >= tapState.reward_per_tap;
+}
+
+async function loadTap() {
+  if (tapLoading || tapFlushing || tapQueue > 0) return;
+  tapLoading = true;
+  try {
+    tapState = await api("/api/tap/state");
+    tapLocalEnergy = tapState.energy;
+    tapLastTick = performance.now();
+    document.getElementById("tapRewardHint").textContent =
+      tapState.reward_per_tap;
+    renderTapUi();
+    if (!tapTicker) tapTicker = setInterval(tickTapEnergy, 1000);
+  } catch (e) {
+    tapState = null;
+    document.getElementById("tapHint").textContent =
+      "Не удалось загрузить тапалку. Открой раздел ещё раз.";
+    toast(e.message);
+  } finally {
+    tapLoading = false;
+  }
+}
+
+function tickTapEnergy() {
+  const now = performance.now();
+  const elapsed = Math.max(0, (now - tapLastTick) / 1000);
+  tapLastTick = now;
+  if (!tapState || tapLoading || document.hidden) return;
+  tapLocalEnergy = Math.min(
+    tapState.energy_max,
+    tapLocalEnergy + elapsed / Math.max(1, tapState.regen_seconds)
+  );
+  renderTapUi();
+}
+
+function renderTapUi() {
+  if (!tapState) return;
+  const energy = Math.max(0, Math.floor(tapLocalEnergy));
+  document.getElementById("tapEnergyVal").textContent =
+    `${energy}/${tapState.energy_max}`;
+  document.getElementById("tapEnergyFill").style.width =
+    `${Math.min(100, Math.max(0, tapLocalEnergy) /
+      Math.max(1, tapState.energy_max) * 100)}%`;
+  document.getElementById("tapDayVal").textContent =
+    `${tapState.day_points}/${tapState.day_cap}`;
+  document.getElementById("tapDayFill").style.width =
+    `${Math.min(100, tapState.day_points /
+      Math.max(1, tapState.day_cap) * 100)}%`;
+
+  const hint = document.getElementById("tapHint");
+  if (!tapCanEarn()) {
+    hint.textContent = "На сегодня всё — дневного остатка не хватает на тап.";
+  } else if (energy < 1) {
+    hint.textContent = "Энергия восстанавливается. Немного подожди ⚡";
+  } else {
+    hint.textContent = `Тапай Пурио! +${tapState.reward_per_tap} ✦ за тап`;
+  }
+}
+
+function spawnTapFloat(x, y) {
+  const stage = document.getElementById("tapStage");
+  if (stage.querySelectorAll(".tap-float").length >= 24) return;
+  const rect = stage.getBoundingClientRect();
+  const span = document.createElement("div");
+  span.className = "tap-float";
+  span.textContent = "+" + tapState.reward_per_tap;
+  span.style.left = (x - rect.left) + "px";
+  span.style.top = (y - rect.top) + "px";
+  stage.appendChild(span);
+  setTimeout(() => span.remove(), 850);
+}
+
+function onTapDragon(x, y) {
+  if (!tapState || tapLoading) return;
+  if (tapLocalEnergy < 1 || !tapCanEarn()) {
+    haptic("warning");
+    return;
+  }
+
+  tapLocalEnergy -= 1;
+  tapState.day_points += tapState.reward_per_tap;
+  tapQueue += 1;
+  spawnTapFloat(x, y);
+  haptic("light");
+
+  const dragon = document.getElementById("tapDragon");
+  dragon.classList.add("pressed");
+  clearTimeout(tapPulseTimer);
+  tapPulseTimer = setTimeout(() => dragon.classList.remove("pressed"), 90);
+  renderTapUi();
+  scheduleTapFlush();
+}
+
+function scheduleTapFlush() {
+  if (tapFlushTimer || tapFlushing || tapQueue <= 0) return;
+  tapFlushTimer = setTimeout(() => {
+    tapFlushTimer = null;
+    void flushTaps();
+  }, 400);
+}
+
+async function flushTaps() {
+  if (!tapState || tapFlushing || tapQueue <= 0) return;
+  clearTimeout(tapFlushTimer);
+  tapFlushTimer = null;
+
+  const count = tapQueue;
+  tapQueue = 0;
+  tapInFlight = count;
+  tapFlushing = true;
+  let failed = false;
+
+  try {
+    const res = await api("/api/tap", {
+      method: "POST",
+      body: { count },
+    });
+
+    // Новые тапы во время запроса остаются в очереди и не теряются
+    // при применении ответа сервера.
+    const reward = res.reward_per_tap;
+    tapState = {
+      ...tapState,
+      energy: res.energy,
+      energy_max: res.energy_max,
+      regen_seconds: res.regen_seconds,
+      reward_per_tap: reward,
+      day_points: Math.min(res.day_cap, res.day_points + tapQueue * reward),
+      day_cap: res.day_cap,
+    };
+    tapLocalEnergy = Math.max(0, res.energy - tapQueue);
+    tapLastTick = performance.now();
+    document.getElementById("tapRewardHint").textContent = reward;
+    document.getElementById("topPointsValue").textContent =
+      fmtNum(res.new_balance);
+    if (STATE) STATE.points = res.new_balance;
+    renderTapUi();
+  } catch (e) {
+    failed = true;
+    // Без серверного idempotency key повторять неопределённый
+    // запрос небезопасно. Перечитываем подтверждённое состояние.
+    tapQueue = 0;
+    tapState = null;
+    toast("Связь прервалась. Обновляем подтверждённые сервером очки.");
+  } finally {
+    tapInFlight = 0;
+    tapFlushing = false;
+    if (failed) {
+      await loadTap();
+      try { await loadState(); } catch (e) { toast(e.message); }
+    } else if (tapQueue > 0) {
+      scheduleTapFlush();
+    }
+  }
+}
+
+const tapStageEl = document.getElementById("tapStage");
+tapStageEl.setAttribute("role", "button");
+tapStageEl.setAttribute("tabindex", "0");
+tapStageEl.setAttribute("aria-label", "Тапнуть дракона Пурио");
+
+tapStageEl.addEventListener("pointerdown", e => {
+  if (e.pointerType === "mouse" && e.button !== 0) return;
+  e.preventDefault();
+  onTapDragon(e.clientX, e.clientY);
+});
+tapStageEl.addEventListener("keydown", e => {
+  if ((e.key !== "Enter" && e.key !== " ") || e.repeat) return;
+  e.preventDefault();
+  const r = tapStageEl.getBoundingClientRect();
+  onTapDragon(r.left + r.width / 2, r.top + r.height / 2);
+});
+tapStageEl.addEventListener("contextmenu", e => e.preventDefault());
+
+document.addEventListener("visibilitychange", () => {
+  tapLastTick = performance.now();
+  if (document.hidden) {
+    void flushTaps();
+  } else if (!tapFlushing && tapQueue === 0) {
+    void loadTap();
+  }
+});
+'''
+
+
+CSS = r'''
+/* PURIO_UI_V3 */
+.app {
+  min-height: 100vh;
+  min-height: 100dvh;
+  max-width: 680px;
+  margin-inline: auto;
+}
+.content { padding-bottom: calc(96px + var(--safe-bottom)); }
+.bottom-nav {
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 680px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  padding: 9px 14px calc(9px + var(--safe-bottom));
+}
+.bottom-nav .nav-btn {
+  min-height: 52px;
+  font-size: 12px;
+  gap: 4px;
+  border-radius: 15px;
+  cursor: pointer;
+}
+.bottom-nav .nav-btn.active {
+  background: #a855f71c;
+  color: #debbff;
+}
+.bottom-nav .nav-ico { font-size: 23px; }
+.purio-links {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.purio-links button {
+  min-height: 46px;
+  padding: 8px 5px;
+  font-size: 12px;
+}
+.tap-stage-card {
+  overflow: hidden;
+  position: relative;
+  padding: 18px 10px;
+  background:
+    radial-gradient(ellipse at 50% 45%, #8043c045, transparent 68%),
+    linear-gradient(160deg, #271b40, #161022);
+}
+.tap-stage {
+  width: min(100%, 310px);
+  height: auto;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  isolation: isolate;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  border-radius: 50%;
+  outline-offset: 4px;
+  background:
+    radial-gradient(circle, #bd83ff18 0 55%, transparent 56%),
+    radial-gradient(circle, transparent 62%, #c89bff24 63%, transparent 64%);
+}
+.tap-stage::after {
+  content: "";
+  position: absolute;
+  width: 54%;
+  height: 8%;
+  left: 23%;
+  bottom: 4%;
+  background: #09041280;
+  border-radius: 50%;
+  filter: blur(8px);
+  z-index: -1;
+}
+.tap-dragon {
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  transform-origin: 50% 80%;
+  transition: transform .09s ease-out;
+  filter: drop-shadow(0 12px 16px #06020b60);
+}
+.tap-dragon:active { transform: none; }
+.tap-dragon.pressed { transform: scale(.945) translateY(3px); }
+.purio-accessory { pointer-events: none; }
+.tap-hint { min-height: 18px; text-align: center; line-height: 1.45; }
+.tap-energy-card .xp-fill { transition: width .12s linear; }
+.dragon-card { padding: 12px 16px; }
+.dragon-mini { overflow: visible; }
+.promo-row input, .ref-link-row input { min-width: 0; width: 0; }
+.support-row { flex-wrap: wrap; }
+.support-row .btn { min-width: 120px; }
+.modal-sheet { max-height: 90dvh; overflow-y: auto; }
+button:focus-visible, a:focus-visible, [role="button"]:focus-visible {
+  outline: 2px solid #ddb5ff;
+  outline-offset: 3px;
+}
+button:disabled { opacity: .45; cursor: default; }
+@media (max-width: 360px) {
+  .content { padding-inline: 10px; }
+  .card { padding: 12px; }
+  .promo-row { flex-direction: column; }
+  .promo-row input { width: 100%; }
+  .bet-row { flex-wrap: wrap; }
+  .bet-quick { min-width: 140px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .page, .modal-sheet, .tap-float { animation: none; }
+  .tap-dragon, .xp-fill { transition: none; }
+}
+'''
+
+
+def main():
+    names = ("index.html", "app.js", "style.css")
+    originals = {}
+
+    for name in names:
+        path = STATIC / name
+        if not path.is_file():
+            raise RuntimeError(f"Не найден {path}")
+        originals[name] = path.read_text(encoding="utf-8-sig")
+
+    html = originals["index.html"]
+    js = originals["app.js"]
+    css = originals["style.css"]
+
+    if MARKER in css:
+        print("Обновление PURIO_UI_V3 уже установлено.")
+        return
+
+    # 1. Новый общий символ дракона.
+    pattern = r'<symbol id="dragon-svg"[^>]*>.*?</symbol>'
+    html, n = re.subn(pattern, lambda _: DRAGON.strip(), html, flags=re.S)
+    if n != 1:
+        raise RuntimeError("Не найден единственный symbol dragon-svg.")
+
+    # 2. Только три нижние кнопки.
+    nav_html = '''
+<nav class="bottom-nav" aria-label="Основная навигация">
+  <button class="nav-btn" data-page="vpn">
+    <span class="nav-ico">🌐</span><span>VPN</span>
+  </button>
+  <button class="nav-btn active" data-page="home" aria-current="page">
+    <span class="nav-ico">🐉</span><span>Дракон</span>
+  </button>
+  <button class="nav-btn" data-page="profile">
+    <span class="nav-ico">👤</span><span>Профиль</span>
+  </button>
+</nav>
+'''
+    html, n = re.subn(
+        r'<nav class="bottom-nav">.*?</nav>',
+        lambda _: nav_html.strip(),
+        html,
+        flags=re.S,
+    )
+    if n != 1:
+        raise RuntimeError("Не найден блок нижней навигации.")
+
+    # 3. Перенос тапалки на главную без дублирования DOM ID.
+    match = re.search(
+        r'<section class="page" id="page-tap">\s*(.*?)\s*</section>',
+        html, flags=re.S,
+    )
+    if not match:
+        raise RuntimeError("Не найдена страница page-tap.")
+
+    tap_content = match.group(1)
+    tap_content = replace_once(
+        tap_content,
+        '<div class="page-title">👆 Purio Tap</div>',
+        '<div class="page-title">🐉 Твой Пурио</div>',
+        "Заголовок тапалки",
+    )
+    tap_content = replace_once(
+        tap_content,
+        "Тапай дракона — получай Purio Points. Активный VPN даёт больше!",
+        "Тапай дракона, собирай очки и открывай новые образы.",
+        "Описание тапалки",
+    )
+    html = html[:match.start()] + html[match.end():]
+
+    links = '''
+<div class="purio-links" aria-label="Разделы дракона">
+  <button class="btn btn-secondary" onclick="Nav.go('tasks')">📋 Задания</button>
+  <button class="btn btn-secondary" onclick="Nav.go('shop')">🛍 Магазин</button>
+  <button class="btn btn-secondary" onclick="Nav.go('casino')">🎲 Игры</button>
+</div>
+'''
+    anchor = '<div class="card streak-card">'
+    html = replace_once(
+        html, anchor,
+        tap_content + "\n" + links + "\n" + anchor,
+        "Перенос тапалки",
+    )
+
+    # Возврат из второстепенных разделов.
+    for page, title in (
+        ("tasks", "📋 Задания дня"),
+        ("casino", "🎰 Purio Casino"),
+    ):
+        old = f'<div class="page-title">{title}</div>'
+        new = (
+            '<div class="page-title-row">'
+            '<button class="btn-back" aria-label="К дракону" '
+            'onclick="Nav.go(\'home\')">‹</button>'
+            f'<div class="page-title" style="margin:0">{title}</div></div>'
+        )
+        html = replace_once(html, old, new, f"Возврат из {page}")
+
+    # 4. Навигация.
+    js = replace_between(
+        js,
+        "const Nav = {",
+        "// ===================== DRAGON SKINS",
+        NAV.strip(),
+        "Навигация JS",
+    )
+
+    # 5. Отрисовка одежды.
+    js = replace_between(
+        js,
+        "function applyEquippedSkinVisuals(skinCode) {",
+        "// ===================== HOME / STATE",
+        VISUALS.strip(),
+        "Экипировка JS",
+    )
+
+    # 6. Изолировать вкладки казино от вкладок магазина.
+    js = replace_once(
+        js,
+        'document.querySelectorAll(".tswitch").forEach(btn => {',
+        'document.querySelectorAll("#page-casino [data-game]").forEach(btn => {',
+        "Кнопки казино",
+    )
+    js = replace_once(
+        js,
+        'document.querySelectorAll(".tswitch").forEach(b => b.classList.remove("active"));',
+        'document.querySelectorAll("#page-casino [data-game]").forEach(b => b.classList.remove("active"));',
+        "Подсветка казино",
+    )
+    js = replace_once(
+        js,
+        'document.querySelectorAll(".game-panel").forEach(p => p.classList.remove("active"));',
+        'document.querySelectorAll("#page-casino .game-panel").forEach(p => p.classList.remove("active"));',
+        "Панели казино",
+    )
+
+    # 7. Сначала получить актуальную экипировку, затем рисовать магазин.
+    js = replace_once(
+        js,
+        "    await loadShop();\n    await loadState();\n    await loadProfile();",
+        "    await loadState();\n    await loadShop();\n    await loadProfile();",
+        "Порядок обновления экипировки",
+    )
+    js = replace_once(
+        js,
+        'btn.addEventListener("click", () => handleShopItemAction(btn.dataset));',
+        '''btn.addEventListener("click", async () => {
+      if (btn.disabled) return;
+      btn.disabled = true;
+      try {
+        await handleShopItemAction(btn.dataset);
+      } finally {
+        btn.disabled = false;
+      }
+    });''',
+        "Защита кнопки магазина",
+    )
+
+    # 8. Обработать ошибку фоновой загрузки заданий.
+    js = replace_once(
+        js,
+        "  renderTasksTeaser();",
+        '''  void renderTasksTeaser().catch(() => {
+    document.getElementById("teaserList").textContent =
+      "Не удалось загрузить задания. Открой раздел ещё раз.";
+  });''',
+        "Ошибки заданий",
+    )
+
+    # 9. Не оставлять кнопку получения награды заблокированной при ошибке.
+    js = replace_once(
+        js,
+        '''        await loadTasks();
+      } catch (e) {
+        haptic("error");
+        toast(e.message);
+      }''',
+        '''        await loadTasks();
+      } catch (e) {
+        haptic("error");
+        toast(e.message);
+      } finally {
+        btn.disabled = false;
+      }''',
+        "Кнопка награды задания",
+    )
+
+    # 10. Честный статус копирования.
+    copy_start = '  document.getElementById("refCopyBtn").onclick = () => {'
+    copy_end = "\n\n  renderSkins();"
+    copy_code = '''
+  document.getElementById("refCopyBtn").onclick = async () => {
+    const input = document.getElementById("refLinkInput");
+    if (!/^https:\\/\\/t\\.me\\//i.test(input.value)) {
+      toast("Реферальная ссылка пока недоступна");
+      return;
+    }
+    try {
+      if (!navigator.clipboard?.writeText) {
+        throw new Error("clipboard unavailable");
+      }
+      await navigator.clipboard.writeText(input.value);
+      haptic("success");
+      toast("Ссылка скопирована!");
+    } catch (e) {
+      input.focus();
+      input.select();
+      input.setSelectionRange(0, input.value.length);
+      toast("Не удалось скопировать автоматически. Скопируй выделенную ссылку.");
+    }
+  };
+'''
+    js = replace_between(
+        js, copy_start, copy_end, copy_code.rstrip(),
+        "Копирование ссылки",
+    )
+
+    # 11. Тапы: очередь, большая зона, без двойных touch/click обработчиков.
+    js = replace_between(
+        js,
+        "// ===================== TAPALKA (Purio Tap)",
+        "// ===================== TOPUP",
+        "// ===================== TAPALKA (Purio Tap) =====================\n"
+        + TAP.strip(),
+        "Обработка тапов",
+    )
+
+    # 12. Не сбрасывать результат Crash сразу после завершения.
+    js = replace_once(
+        js,
+        "async function loadCasino() {",
+        "async function loadCasino(resume = true) {",
+        "Загрузка казино",
+    )
+    js = replace_once(
+        js,
+        "  renderPaytable();\n  await resumeCrashRound();",
+        "  renderPaytable();\n  if (resume) await resumeCrashRound();",
+        "Возобновление Crash",
+    )
+    start = js.index("async function finishCrashRound(autoBust) {")
+    end = js.index("// ===================== TAPALKA", start)
+    block = js[start:end]
+    block = replace_once(
+        block, "await loadCasino();", "await loadCasino(false);",
+        "Сохранение результата Crash",
+    )
+    js = js[:start] + block + js[end:]
+
+    # 13. Не оставлять отклонённый Promise без обработчика во время анимации.
+    js = replace_once(
+        js,
+        '''    await new Promise(r => setTimeout(r, 700)); // небольшая анимация перед результатом
+    const { result, new_balance } = await spinPromise;''',
+        '''    const [{ result, new_balance }] = await Promise.all([
+      spinPromise,
+      new Promise(r => setTimeout(r, 700)),
+    ]);''',
+        "Ожидание результата слотов",
+    )
+
+    # 14. Начальная загрузка и обработка её ошибок.
+    js = replace_once(
+        js,
+        '''  await loadState();
+  await loadExchangeInfo();
+})();''',
+        '''  try {
+    await loadState();
+    await loadExchangeInfo();
+    await loadTap();
+  } catch (e) {
+    console.error("initial load failed", e);
+    toast("Не удалось загрузить приложение. Закрой и открой его ещё раз.");
+  }
+})();''',
+        "Инициализация",
+    )
+
+    css += "\n" + CSS.strip() + "\n"
+
+    # Смена URL ресурсов, чтобы WebView запросил обновлённую версию.
+    html = replace_once(
+        html, 'href="/static/style.css"',
+        'href="/static/style.css?v=purio-ui-3"', "Версия CSS",
+    )
+    html = replace_once(
+        html, 'src="/static/app.js"',
+        'src="/static/app.js?v=purio-ui-3"', "Версия JS",
+    )
+
+    # Структурные проверки перед любой записью.
+    ids = re.findall(r'\bid="([^"]+)"', html)
+    duplicates = sorted({value for value in ids if ids.count(value) > 1})
+    if duplicates:
+        raise RuntimeError(f"Повторяющиеся HTML ID: {duplicates}")
+    if html.count('class="nav-btn') != 3:
+        raise RuntimeError("Проверка меню: количество кнопок не равно трём.")
+    if 'id="page-tap"' in html:
+        raise RuntimeError("Старая страница тапалки не удалена.")
+    if 'id="tapDragon"' not in html:
+        raise RuntimeError("Не найден дракон тапалки.")
+
+    updated = {"index.html": html, "app.js": js, "style.css": css}
+
+    backup = ROOT / (
+        "purio-ui-backup-" + datetime.now().strftime("%Y%m%d-%H%M%S-%f")
+    )
+    backup.mkdir()
+    for name in names:
+        shutil.copy2(STATIC / name, backup / name)
+
+    try:
+        for name, content in updated.items():
+            (STATIC / name).write_text(content, encoding="utf-8")
+    except Exception:
+        for name in names:
+            shutil.copy2(backup / name, STATIC / name)
+        raise
+
+    print()
+    print("Обновление интерфейса записано.")
+    print(f"Резервная копия: {backup}")
+    print("Изменены только webapp/static/index.html, app.js и style.css.")
+    print("База данных, баланс, платежи и Python-сервер не изменялись.")
+    print("Закрой мини-приложение полностью и открой заново.")
+    print("Если приложение на сервере — загрузи туда три обновлённых файла.")
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except Exception as exc:
+        print(f"\nОШИБКА: {exc}")
+        raise SystemExit(1)
