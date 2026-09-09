@@ -53,6 +53,7 @@ function fmtDate(ts) {
 
 // ===================== NAV =====================
 const Nav = {
+<<<<<<< HEAD
   async go(page) {
     if (page === "tap") page = "home";
     const target = document.getElementById("page-" + page);
@@ -93,6 +94,28 @@ const Nav = {
 };
 document.querySelectorAll(".nav-btn").forEach(btn => {
   btn.addEventListener("click", () => Nav.go(btn.dataset.page));
+=======
+  go(page) {
+    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+    document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+    document.getElementById("page-" + page).classList.add("active");
+    // БАГ (исправлено): querySelector возвращал null для страниц без кнопки в
+    // нижней навигации (например "shop", открываемой карточкой из профиля),
+    // и .classList.add на null валил весь переход по странице. Теперь просто
+    // не подсвечиваем несуществующую кнопку вместо падения с ошибкой.
+    const navBtn = document.querySelector(`.nav-btn[data-page="${page}"]`);
+    if (navBtn) navBtn.classList.add("active");
+    if (page === "tasks") loadTasks();
+    if (page === "vpn") loadVpn();
+    if (page === "tap") loadTap();
+    if (page === "casino") loadCasino();
+    if (page === "profile") loadProfile();
+    if (page === "shop") loadShop();
+  }
+};
+document.querySelectorAll(".nav-btn").forEach(btn => {
+  btn.addEventListener("click", () => { haptic(); Nav.go(btn.dataset.page); });
+>>>>>>> df6d2d6e09f4f0a797a32b4b9b2236764894ba91
 });
 
 // ===================== DRAGON SKINS (visual filters) =====================
@@ -105,6 +128,7 @@ const SKIN_FILTERS = {
   storm: "hue-rotate(150deg) saturate(1.6) brightness(1.05)",
   cosmic: "hue-rotate(-90deg) saturate(2) brightness(1.15)",
 };
+<<<<<<< HEAD
 // Аксессуары рисуются отдельно от тела: фильтр скина их не перекрашивает.
 const PURIO_CLOTHES = {
   cloth_scarf_red: {
@@ -215,6 +239,17 @@ function applyEquippedSkinVisuals(skinCode) {
       <g class="purio-accessory">${art.front || ""}</g>
     `;
     el.querySelector(".purio-body").style.filter = filter || "none";
+=======
+function applyEquippedSkinVisuals(skinCode) {
+  const filter = SKIN_FILTERS[skinCode] || "";
+  const dragonEls = [
+    document.getElementById("dragonBig"),
+    document.getElementById("tapDragon"),
+    document.querySelector("#topDragon .dragon-mini"),
+  ];
+  dragonEls.forEach(el => {
+    if (el) el.style.filter = filter ? filter + " drop-shadow(0 4px 10px #7c3aed55)" : "";
+>>>>>>> df6d2d6e09f4f0a797a32b4b9b2236764894ba91
   });
 }
 
@@ -227,10 +262,14 @@ async function loadState() {
   renderDragon();
   renderStreak();
   renderHomeStats();
+<<<<<<< HEAD
   void renderTasksTeaser().catch(() => {
     document.getElementById("teaserList").textContent =
       "Не удалось загрузить задания. Открой раздел ещё раз.";
   });
+=======
+  renderTasksTeaser();
+>>>>>>> df6d2d6e09f4f0a797a32b4b9b2236764894ba91
 }
 
 function renderTop() {
@@ -325,8 +364,11 @@ async function loadTasks() {
       } catch (e) {
         haptic("error");
         toast(e.message);
+<<<<<<< HEAD
       } finally {
         btn.disabled = false;
+=======
+>>>>>>> df6d2d6e09f4f0a797a32b4b9b2236764894ba91
       }
     });
   });
@@ -436,6 +478,7 @@ function roundRect(ctx, x, y, w, h, r) {
 // ===================== CASINO =====================
 let casinoGame = "dice";
 
+<<<<<<< HEAD
 document.querySelectorAll("#page-casino [data-game]").forEach(btn => {
   btn.addEventListener("click", () => {
     haptic();
@@ -443,6 +486,15 @@ document.querySelectorAll("#page-casino [data-game]").forEach(btn => {
     document.querySelectorAll("#page-casino [data-game]").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
     document.querySelectorAll("#page-casino .game-panel").forEach(p => p.classList.remove("active"));
+=======
+document.querySelectorAll(".tswitch").forEach(btn => {
+  btn.addEventListener("click", () => {
+    haptic();
+    casinoGame = btn.dataset.game;
+    document.querySelectorAll(".tswitch").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    document.querySelectorAll(".game-panel").forEach(p => p.classList.remove("active"));
+>>>>>>> df6d2d6e09f4f0a797a32b4b9b2236764894ba91
     document.getElementById("game-" + casinoGame).classList.add("active");
   });
 });
@@ -483,7 +535,11 @@ function crashQuickBetButtons() {
   });
 }
 
+<<<<<<< HEAD
 async function loadCasino(resume = true) {
+=======
+async function loadCasino() {
+>>>>>>> df6d2d6e09f4f0a797a32b4b9b2236764894ba91
   const data = await api("/api/casino/state");
   casinoBalance = data.points;
   document.getElementById("casinoBalance").textContent = fmtNum(casinoBalance);
@@ -493,7 +549,11 @@ async function loadCasino(resume = true) {
   betQuickButtons("coinBetQuick", "coinBet", () => casinoBalance);
   crashQuickBetButtons();
   renderPaytable();
+<<<<<<< HEAD
   if (resume) await resumeCrashRound();
+=======
+  await resumeCrashRound();
+>>>>>>> df6d2d6e09f4f0a797a32b4b9b2236764894ba91
 }
 
 function renderPaytable() {
@@ -569,10 +629,15 @@ document.getElementById("slotSpinBtn").addEventListener("click", async () => {
 
   try {
     const spinPromise = api("/api/casino/slots", { method: "POST", body: { bet } });
+<<<<<<< HEAD
     const [{ result, new_balance }] = await Promise.all([
       spinPromise,
       new Promise(r => setTimeout(r, 700)),
     ]);
+=======
+    await new Promise(r => setTimeout(r, 700)); // небольшая анимация перед результатом
+    const { result, new_balance } = await spinPromise;
+>>>>>>> df6d2d6e09f4f0a797a32b4b9b2236764894ba91
     reelEls.forEach((r, i) => { r.classList.remove("spin"); r.textContent = result.reels[i]; });
     casinoBalance = new_balance;
     document.getElementById("casinoBalance").textContent = fmtNum(casinoBalance);
@@ -848,7 +913,11 @@ async function finishCrashRound(autoBust) {
     document.getElementById("crashStartBtn").style.display = "";
     document.getElementById("crashCashoutBtn").style.display = "none";
 
+<<<<<<< HEAD
     await loadCasino(false);
+=======
+    await loadCasino();
+>>>>>>> df6d2d6e09f4f0a797a32b4b9b2236764894ba91
     await loadState();
   } catch (e) {
     haptic("error");
@@ -863,15 +932,19 @@ async function finishCrashRound(autoBust) {
 }
 
 // ===================== TAPALKA (Purio Tap) =====================
+<<<<<<< HEAD
 // Серверное состояние + очередь ещё не отправленных тапов.
 // Запросы на начисление не повторяются автоматически: это могло бы
 // удвоить награду, если сервер обработал запрос, но ответ потерялся.
+=======
+>>>>>>> df6d2d6e09f4f0a797a32b4b9b2236764894ba91
 let tapState = null;
 let tapLocalEnergy = 0;
 let tapQueue = 0;
 let tapFlushTimer = null;
 let tapTicker = null;
 let tapFlushing = false;
+<<<<<<< HEAD
 let tapLoading = false;
 let tapInFlight = 0;
 let tapLastTick = performance.now();
@@ -913,10 +986,34 @@ function tickTapEnergy() {
     tapLocalEnergy + elapsed / Math.max(1, tapState.regen_seconds)
   );
   renderTapUi();
+=======
+
+async function loadTap() {
+  try {
+    tapState = await api("/api/tap/state");
+  } catch (e) {
+    toast(e.message);
+    return;
+  }
+  tapLocalEnergy = tapState.energy;
+  document.getElementById("tapRewardHint").textContent = tapState.reward_per_tap;
+  renderTapUi();
+  if (tapTicker) clearInterval(tapTicker);
+  tapTicker = setInterval(tickTapEnergy, 1000);
+}
+
+function tickTapEnergy() {
+  if (!tapState) return;
+  if (tapLocalEnergy < tapState.energy_max) {
+    tapLocalEnergy = Math.min(tapState.energy_max, tapLocalEnergy + 1 / tapState.regen_seconds);
+    renderTapUi();
+  }
+>>>>>>> df6d2d6e09f4f0a797a32b4b9b2236764894ba91
 }
 
 function renderTapUi() {
   if (!tapState) return;
+<<<<<<< HEAD
   const energy = Math.max(0, Math.floor(tapLocalEnergy));
   document.getElementById("tapEnergyVal").textContent =
     `${energy}/${tapState.energy_max}`;
@@ -936,22 +1033,44 @@ function renderTapUi() {
     hint.textContent = "Энергия восстанавливается. Немного подожди ⚡";
   } else {
     hint.textContent = `Тапай Пурио! +${tapState.reward_per_tap} ✦ за тап`;
+=======
+  const energyShown = Math.floor(tapLocalEnergy);
+  document.getElementById("tapEnergyVal").textContent = `${energyShown}/${tapState.energy_max}`;
+  document.getElementById("tapEnergyFill").style.width = (tapLocalEnergy / tapState.energy_max * 100) + "%";
+  document.getElementById("tapDayVal").textContent = `${tapState.day_points}/${tapState.day_cap}`;
+  document.getElementById("tapDayFill").style.width = (Math.min(1, tapState.day_points / tapState.day_cap) * 100) + "%";
+  const hint = document.getElementById("tapHint");
+  if (tapState.day_points >= tapState.day_cap) {
+    hint.textContent = "Дневной лимит тапалки исчерпан — держи VPN активным!";
+  } else if (energyShown < 1) {
+    hint.textContent = "Энергия закончилась, подожди немного";
+  } else {
+    hint.textContent = "Тапай дракона!";
+>>>>>>> df6d2d6e09f4f0a797a32b4b9b2236764894ba91
   }
 }
 
 function spawnTapFloat(x, y) {
   const stage = document.getElementById("tapStage");
+<<<<<<< HEAD
   if (stage.querySelectorAll(".tap-float").length >= 24) return;
   const rect = stage.getBoundingClientRect();
   const span = document.createElement("div");
   span.className = "tap-float";
   span.textContent = "+" + tapState.reward_per_tap;
+=======
+  const rect = stage.getBoundingClientRect();
+  const span = document.createElement("div");
+  span.className = "tap-float";
+  span.textContent = "+" + (tapState ? tapState.reward_per_tap : 1);
+>>>>>>> df6d2d6e09f4f0a797a32b4b9b2236764894ba91
   span.style.left = (x - rect.left) + "px";
   span.style.top = (y - rect.top) + "px";
   stage.appendChild(span);
   setTimeout(() => span.remove(), 850);
 }
 
+<<<<<<< HEAD
 function onTapDragon(x, y) {
   if (!tapState || tapLoading) return;
   if (tapLocalEnergy < 1 || !tapCanEarn()) {
@@ -969,11 +1088,30 @@ function onTapDragon(x, y) {
   dragon.classList.add("pressed");
   clearTimeout(tapPulseTimer);
   tapPulseTimer = setTimeout(() => dragon.classList.remove("pressed"), 90);
+=======
+function onTapDragon(clientX, clientY) {
+  if (!tapState) return;
+  if (tapLocalEnergy < 1) { haptic("warning"); return; }
+  if (tapState.day_points >= tapState.day_cap) { haptic("warning"); toast("Дневной лимит тапалки исчерпан 🌙"); return; }
+
+  tapLocalEnergy -= 1;
+  tapState.day_points = Math.min(tapState.day_cap, tapState.day_points + tapState.reward_per_tap);
+  tapQueue += 1;
+  spawnTapFloat(clientX, clientY);
+  haptic("light");
+
+  const dragon = document.getElementById("tapDragon");
+  dragon.classList.remove("pulse");
+  void dragon.offsetWidth;
+  dragon.classList.add("pulse");
+
+>>>>>>> df6d2d6e09f4f0a797a32b4b9b2236764894ba91
   renderTapUi();
   scheduleTapFlush();
 }
 
 function scheduleTapFlush() {
+<<<<<<< HEAD
   if (tapFlushTimer || tapFlushing || tapQueue <= 0) return;
   tapFlushTimer = setTimeout(() => {
     tapFlushTimer = null;
@@ -1062,6 +1200,46 @@ document.addEventListener("visibilitychange", () => {
     void loadTap();
   }
 });
+=======
+  if (tapFlushTimer) return;
+  tapFlushTimer = setTimeout(flushTaps, 700);
+}
+
+async function flushTaps() {
+  tapFlushTimer = null;
+  if (tapQueue <= 0 || tapFlushing) return;
+  const count = tapQueue;
+  tapQueue = 0;
+  tapFlushing = true;
+  try {
+    const res = await api("/api/tap", { method: "POST", body: { count } });
+    tapState.energy = res.energy;
+    tapLocalEnergy = res.energy;
+    tapState.day_points = res.day_points;
+    tapState.day_cap = res.day_cap;
+    renderTapUi();
+    document.getElementById("topPointsValue").textContent = fmtNum(res.new_balance);
+    if (STATE) STATE.points = res.new_balance;
+    if (res.capped && res.points_earned === 0) {
+      toast("Дневной лимит тапалки исчерпан — вернись завтра или используй VPN 😉");
+    }
+  } catch (e) {
+    toast(e.message);
+  } finally {
+    tapFlushing = false;
+    if (tapQueue > 0) scheduleTapFlush();
+  }
+}
+
+const tapDragonEl = document.getElementById("tapDragon");
+tapDragonEl.addEventListener("click", (e) => onTapDragon(e.clientX, e.clientY));
+tapDragonEl.addEventListener("touchstart", (e) => {
+  e.preventDefault();
+  for (const t of e.changedTouches) onTapDragon(t.clientX, t.clientY);
+}, { passive: false });
+
+window.addEventListener("beforeunload", () => { if (tapQueue > 0) flushTaps(); });
+>>>>>>> df6d2d6e09f4f0a797a32b4b9b2236764894ba91
 
 // ===================== TOPUP (пополнение баланса) =====================
 let topupTxId = null;
@@ -1180,6 +1358,7 @@ async function loadProfile() {
   document.getElementById("supportLink").href = "https://t.me/" + (p.support_username || "").replace("@", "");
   document.getElementById("channelLink").href = p.channel_link || "#";
 
+<<<<<<< HEAD
 
   document.getElementById("refCopyBtn").onclick = async () => {
     const input = document.getElementById("refLinkInput");
@@ -1204,6 +1383,16 @@ async function loadProfile() {
 
 
 
+=======
+  document.getElementById("refCopyBtn").onclick = () => {
+    const input = document.getElementById("refLinkInput");
+    input.select();
+    navigator.clipboard && navigator.clipboard.writeText(input.value).catch(() => {});
+    haptic("success");
+    toast("Ссылка скопирована!");
+  };
+
+>>>>>>> df6d2d6e09f4f0a797a32b4b9b2236764894ba91
   renderSkins();
 }
 
@@ -1431,6 +1620,7 @@ function renderShopGrid() {
   });
 
   grid.querySelectorAll("[data-action]").forEach(btn => {
+<<<<<<< HEAD
     btn.addEventListener("click", async () => {
       if (btn.disabled) return;
       btn.disabled = true;
@@ -1440,6 +1630,9 @@ function renderShopGrid() {
         btn.disabled = false;
       }
     });
+=======
+    btn.addEventListener("click", () => handleShopItemAction(btn.dataset));
+>>>>>>> df6d2d6e09f4f0a797a32b4b9b2236764894ba91
   });
 }
 
@@ -1460,8 +1653,13 @@ async function handleShopItemAction(ds) {
       await api("/api/shop/equip-badge", { method: "POST", body: { slot: 0, badge_code: ds.code } });
       toast("Значок надет (слот 1)");
     }
+<<<<<<< HEAD
     await loadState();
     await loadShop();
+=======
+    await loadShop();
+    await loadState();
+>>>>>>> df6d2d6e09f4f0a797a32b4b9b2236764894ba91
     await loadProfile();
   } catch (e) {
     haptic("error");
@@ -1700,6 +1898,7 @@ async function loadShop() {
     toast("Не удалось авторизоваться. Открой приложение через кнопку в боте.");
     return;
   }
+<<<<<<< HEAD
   try {
     await loadState();
     await loadExchangeInfo();
@@ -1708,4 +1907,8 @@ async function loadShop() {
     console.error("initial load failed", e);
     toast("Не удалось загрузить приложение. Закрой и открой его ещё раз.");
   }
+=======
+  await loadState();
+  await loadExchangeInfo();
+>>>>>>> df6d2d6e09f4f0a797a32b4b9b2236764894ba91
 })();

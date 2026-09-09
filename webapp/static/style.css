@@ -406,6 +406,7 @@ input[type=range]{ width:100%; accent-color: var(--accent); margin-bottom:12px; 
 .reward-modal-icon{ font-size:52px; text-align:center; margin:6px 0 4px 0; }
 .reward-modal-text{ text-align:center; font-weight:800; font-size:16px; margin-bottom:4px; }
 .reward-modal-sub{ text-align:center; color:var(--muted); font-size:12px; margin-bottom:10px; }
+<<<<<<< HEAD
 
 /* PURIO_UI_V3 */
 .app {
@@ -524,3 +525,5 @@ button:disabled { opacity: .45; cursor: default; }
   .page, .modal-sheet, .tap-float { animation: none; }
   .tap-dragon, .xp-fill { transition: none; }
 }
+=======
+>>>>>>> df6d2d6e09f4f0a797a32b4b9b2236764894ba91

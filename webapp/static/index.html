@@ -5,7 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Purio App</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<<<<<<< HEAD
 <link rel="stylesheet" href="/static/style.css?v=purio-ui-3">
+=======
+<link rel="stylesheet" href="/static/style.css">
+>>>>>>> df6d2d6e09f4f0a797a32b4b9b2236764894ba91
 </head>
 <body>
 
@@ -48,6 +52,7 @@
         </div>
       </div>
 
+<<<<<<< HEAD
       <div class="page-title">🐉 Твой Пурио</div>
       <div class="page-subtitle">Тапай дракона, собирай очки и открывай новые образы.</div>
 
@@ -85,6 +90,9 @@
 </div>
 
 <div class="card streak-card">
+=======
+      <div class="card streak-card">
+>>>>>>> df6d2d6e09f4f0a797a32b4b9b2236764894ba91
         <div class="card-title">🔥 Серия входов <span class="muted" id="streakWeekLabel"></span></div>
         <div class="streak-row" id="streakRow"></div>
         <div class="streak-hint" id="streakHint">Заходи каждый день — награда растёт всю неделю!</div>
@@ -113,7 +121,11 @@
 
     <!-- ===== TASKS ===== -->
     <section class="page" id="page-tasks">
+<<<<<<< HEAD
       <div class="page-title-row"><button class="btn-back" aria-label="К дракону" onclick="Nav.go('home')">‹</button><div class="page-title" style="margin:0">📋 Задания дня</div></div>
+=======
+      <div class="page-title">📋 Задания дня</div>
+>>>>>>> df6d2d6e09f4f0a797a32b4b9b2236764894ba91
       <div class="page-subtitle">Обновляются каждый день в 00:00 UTC</div>
       <div id="tasksList" class="tasks-list"></div>
     </section>
@@ -149,7 +161,11 @@
 
     <!-- ===== CASINO ===== -->
     <section class="page" id="page-casino">
+<<<<<<< HEAD
       <div class="page-title-row"><button class="btn-back" aria-label="К дракону" onclick="Nav.go('home')">‹</button><div class="page-title" style="margin:0">🎰 Purio Casino</div></div>
+=======
+      <div class="page-title">🎰 Purio Casino</div>
+>>>>>>> df6d2d6e09f4f0a797a32b4b9b2236764894ba91
       <div class="casino-balance">Баланс: <span class="coin">✦</span><span id="casinoBalance">0</span></div>
 
       <div class="tabs-switch tabs-switch-4">
@@ -259,7 +275,41 @@
     </section>
 
     <!-- ===== TAP (тапалка) ===== -->
+<<<<<<< HEAD
     
+=======
+    <section class="page" id="page-tap">
+      <div class="page-title">👆 Purio Tap</div>
+      <div class="page-subtitle">Тапай дракона — получай Purio Points. Активный VPN даёт больше!</div>
+
+      <div class="card tap-energy-card">
+        <div class="control-row">
+          <span>⚡ Энергия</span><span id="tapEnergyVal">0/0</span>
+        </div>
+        <div class="xp-bar"><div class="xp-fill" id="tapEnergyFill"></div></div>
+        <div class="control-row" style="margin-top:10px;">
+          <span>🎯 Дневной лимит тапалки</span><span id="tapDayVal">0/0</span>
+        </div>
+        <div class="xp-bar"><div class="xp-fill tap-cap-fill" id="tapDayFill"></div></div>
+      </div>
+
+      <div class="card tap-stage-card">
+        <div class="tap-stage" id="tapStage">
+          <svg viewBox="0 0 200 200" class="dragon-big tap-dragon" id="tapDragon"><use href="#dragon-svg"/></svg>
+        </div>
+        <div class="tap-hint" id="tapHint">Тапай дракона!</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">ℹ️ Как это работает</div>
+        <div class="muted small">
+          Каждый тап = <b id="tapRewardHint">1</b> ✦. Энергия тратится за тап и восстанавливается сама
+          со временем. Дневной лимит очков от тапалки ограничен — чтобы получать больше,
+          держи VPN активным: он приносит очки каждый час автоматически.
+        </div>
+      </div>
+    </section>
+>>>>>>> df6d2d6e09f4f0a797a32b4b9b2236764894ba91
 
     <!-- ===== PROFILE ===== -->
     <section class="page" id="page-profile">
@@ -390,6 +440,7 @@
   </main>
 
   <!-- ===== BOTTOM NAV ===== -->
+<<<<<<< HEAD
   <nav class="bottom-nav" aria-label="Основная навигация">
   <button class="nav-btn" data-page="vpn">
     <span class="nav-ico">🌐</span><span>VPN</span>
@@ -401,6 +452,16 @@
     <span class="nav-ico">👤</span><span>Профиль</span>
   </button>
 </nav>
+=======
+  <nav class="bottom-nav">
+    <button class="nav-btn active" data-page="home"><span class="nav-ico">🏠</span><span>Главная</span></button>
+    <button class="nav-btn" data-page="tasks"><span class="nav-ico">📋</span><span>Задания</span></button>
+    <button class="nav-btn" data-page="vpn"><span class="nav-ico">🌐</span><span>VPN</span></button>
+    <button class="nav-btn" data-page="tap"><span class="nav-ico">👆</span><span>Тапалка</span></button>
+    <button class="nav-btn" data-page="casino"><span class="nav-ico">🎰</span><span>Казино</span></button>
+    <button class="nav-btn" data-page="profile"><span class="nav-ico">👤</span><span>Профиль</span></button>
+  </nav>
+>>>>>>> df6d2d6e09f4f0a797a32b4b9b2236764894ba91
 </div>
 
 <!-- ===== TOPUP MODAL ===== -->
@@ -456,6 +517,7 @@
 <svg style="position:absolute;width:0;height:0" aria-hidden="true">
   <defs>
     <symbol id="dragon-svg" viewBox="0 0 200 200">
+<<<<<<< HEAD
   <defs>
     <linearGradient id="purioBody" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#cf9bff"/>
@@ -547,5 +609,29 @@
 </svg>
 
 <script src="/static/app.js?v=purio-ui-3"></script>
+=======
+      <defs>
+        <linearGradient id="dgrad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#c084fc"/>
+          <stop offset="100%" stop-color="#7c3aed"/>
+        </linearGradient>
+      </defs>
+      <ellipse cx="100" cy="120" rx="55" ry="46" fill="url(#dgrad)"/>
+      <ellipse cx="70" cy="60" rx="34" ry="30" fill="url(#dgrad)"/>
+      <path d="M45 40 Q35 15 55 25 Q52 40 45 40Z" fill="#a855f7"/>
+      <path d="M95 35 Q100 10 115 28 Q105 40 95 35Z" fill="#a855f7"/>
+      <circle cx="58" cy="55" r="6" fill="#1b0f2e"/>
+      <circle cx="60" cy="53" r="2" fill="#fff"/>
+      <path d="M40 70 Q50 78 60 70" stroke="#3b0764" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M150 130 Q180 110 175 90 Q160 100 150 120Z" fill="#a855f7"/>
+      <path d="M100 160 Q95 185 110 190 Q120 178 112 160Z" fill="#7c3aed"/>
+      <ellipse cx="60" cy="120" rx="16" ry="10" fill="#e9d5ff" opacity="0.85"/>
+      <ellipse cx="135" cy="120" rx="16" ry="10" fill="#e9d5ff" opacity="0.85"/>
+    </symbol>
+  </defs>
+</svg>
+
+<script src="/static/app.js"></script>
+>>>>>>> df6d2d6e09f4f0a797a32b4b9b2236764894ba91
 </body>
 </html>
