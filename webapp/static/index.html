@@ -116,9 +116,11 @@
       <div class="page-title">🎰 Purio Casino</div>
       <div class="casino-balance">Баланс: <span class="coin">✦</span><span id="casinoBalance">0</span></div>
 
-      <div class="tabs-switch">
+      <div class="tabs-switch tabs-switch-4">
         <button class="tswitch active" data-game="dice">🎲 Кости</button>
         <button class="tswitch" data-game="slots">🎰 Слоты</button>
+        <button class="tswitch" data-game="coin">🪙 Монетка</button>
+        <button class="tswitch" data-game="crash">📈 Краш</button>
       </div>
 
       <!-- DICE -->
@@ -170,9 +172,86 @@
         </div>
       </div>
 
+      <!-- COINFLIP -->
+      <div class="game-panel" id="game-coin">
+        <div class="card coin-card">
+          <div class="coin3d" id="coinFlipStage">
+            <div class="coin-inner" id="coinInner">
+              <div class="coin-face coin-front">🦅<span class="coin-face-label">Орёл</span></div>
+              <div class="coin-face coin-back">Р<span class="coin-face-label">Решка</span></div>
+            </div>
+          </div>
+          <div class="coin-choice" id="coinChoice">
+            <button class="coin-choice-btn active" data-choice="heads">🦅 Орёл</button>
+            <button class="coin-choice-btn" data-choice="tails">Р Решка</button>
+          </div>
+          <div class="coin-result" id="coinResult">Выбери сторону и подкинь монетку</div>
+          <div class="bet-row">
+            <div class="bet-input-wrap">
+              <span class="coin">✦</span>
+              <input type="number" id="coinBet" value="10" min="1">
+            </div>
+            <div class="bet-quick" id="coinBetQuick"></div>
+          </div>
+          <button class="btn btn-primary btn-big" id="coinFlipBtn">🪙 Подкинуть монетку</button>
+          <div class="muted small" style="margin-top:8px; text-align:center;" id="coinMultHint">Выплата за угаданную сторону: x1.94</div>
+        </div>
+      </div>
+
+      <!-- CRASH -->
+      <div class="game-panel" id="game-crash">
+        <div class="card crash-card">
+          <canvas id="crashCanvas" width="300" height="160"></canvas>
+          <div class="crash-mult" id="crashMultLabel">1.00x</div>
+          <div class="crash-status" id="crashStatus">Сделай ставку и жми «Старт»</div>
+          <div class="bet-row">
+            <div class="bet-input-wrap">
+              <span class="coin">✦</span>
+              <input type="number" id="crashBet" value="10" min="1">
+            </div>
+            <div class="bet-quick" id="crashBetQuick"></div>
+          </div>
+          <button class="btn btn-primary btn-big" id="crashStartBtn">🚀 Старт раунда</button>
+          <button class="btn btn-primary btn-big crash-cashout-btn" id="crashCashoutBtn" style="display:none;">💰 Забрать выигрыш</button>
+        </div>
+      </div>
+
       <div class="card">
         <div class="card-title">🕘 История ставок</div>
         <div id="casinoHistory" class="casino-history"></div>
+      </div>
+    </section>
+
+    <!-- ===== TAP (тапалка) ===== -->
+    <section class="page" id="page-tap">
+      <div class="page-title">👆 Purio Tap</div>
+      <div class="page-subtitle">Тапай дракона — получай Purio Points. Активный VPN даёт больше!</div>
+
+      <div class="card tap-energy-card">
+        <div class="control-row">
+          <span>⚡ Энергия</span><span id="tapEnergyVal">0/0</span>
+        </div>
+        <div class="xp-bar"><div class="xp-fill" id="tapEnergyFill"></div></div>
+        <div class="control-row" style="margin-top:10px;">
+          <span>🎯 Дневной лимит тапалки</span><span id="tapDayVal">0/0</span>
+        </div>
+        <div class="xp-bar"><div class="xp-fill tap-cap-fill" id="tapDayFill"></div></div>
+      </div>
+
+      <div class="card tap-stage-card">
+        <div class="tap-stage" id="tapStage">
+          <svg viewBox="0 0 200 200" class="dragon-big tap-dragon" id="tapDragon"><use href="#dragon-svg"/></svg>
+        </div>
+        <div class="tap-hint" id="tapHint">Тапай дракона!</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">ℹ️ Как это работает</div>
+        <div class="muted small">
+          Каждый тап = <b id="tapRewardHint">1</b> ✦. Энергия тратится за тап и восстанавливается сама
+          со временем. Дневной лимит очков от тапалки ограничен — чтобы получать больше,
+          держи VPN активным: он приносит очки каждый час автоматически.
+        </div>
       </div>
     </section>
 
@@ -185,6 +264,22 @@
         <div class="profile-row"><span>Подписка</span><b id="profSub">—</b></div>
         <div class="profile-row"><span>Уровень дракона</span><b id="profLevel">1</b></div>
         <div class="profile-row"><span>Purio Points</span><b id="profPoints">0</b></div>
+        <button class="btn btn-primary btn-big" id="topupOpenBtn">💳 Пополнить баланс</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🔄 Обмен Purio Points на рубли</div>
+        <div class="muted small" id="exchangeRateHint" style="margin-bottom:10px;">Курс: 1000 ✦ = 1 ₽</div>
+        <div class="bet-input-wrap" style="margin-bottom:8px;">
+          <span class="coin">✦</span>
+          <input type="number" id="exchangePoints" value="10000" min="1" style="width:100%;">
+        </div>
+        <div class="bet-quick" id="exchangeQuick" style="margin-bottom:10px;"></div>
+        <div class="muted small" id="exchangePreview" style="margin-bottom:10px;">Получишь: 10.00 ₽</div>
+        <button class="btn btn-primary btn-big" id="exchangeSubmitBtn">Обменять на баланс</button>
+        <div class="muted small" style="margin-top:8px; text-align:center;">
+          Рубли зачисляются на баланс — ими можно сразу оплатить подписку VPN.
+        </div>
       </div>
 
       <div class="card">
@@ -203,16 +298,10 @@
         </div>
       </div>
 
-      <div class="card soon-card">
+      <div class="card tasks-teaser" id="shopTeaser" onclick="Nav.go('shop')">
         <div class="card-title">🛍 Purio Shop</div>
-        <div class="soon-badge">В разработке</div>
-        <div class="muted small">Скины, украшения и предметы для дракона появятся здесь совсем скоро.</div>
-      </div>
-
-      <div class="card soon-card">
-        <div class="card-title">🎁 Обмен на подарки</div>
-        <div class="soon-badge">В разработке</div>
-        <div class="muted small">Копи Purio Points — скоро их можно будет обменять на подарки и призы.</div>
+        <div class="muted small">Скины, рамки, титулы, Mystery Box, Колесо удачи, бустеры и многое другое.</div>
+        <div class="teaser-more">Открыть магазин →</div>
       </div>
 
       <div class="card">
@@ -224,6 +313,74 @@
       </div>
     </section>
 
+    <!-- ===== SHOP ===== -->
+    <section class="page" id="page-shop">
+      <div class="page-title-row">
+        <button class="btn-back" onclick="Nav.go('profile')">◀️</button>
+        <div class="page-title" style="margin:0;">🛍 Purio Shop</div>
+      </div>
+
+      <div class="tabs-switch tabs-switch-shop">
+        <button class="tswitch active" data-shoptab="cosmetics">🎨 Косметика</button>
+        <button class="tswitch" data-shoptab="boxes">📦 Кейсы</button>
+        <button class="tswitch" data-shoptab="wheel">🎡 Колесо</button>
+        <button class="tswitch" data-shoptab="boosters">🪙 Бустеры</button>
+      </div>
+
+      <!-- COSMETICS -->
+      <div class="game-panel active" id="shoptab-cosmetics">
+        <div class="card" id="rotationCard" style="display:none;">
+          <div class="card-title">🔥 Эксклюзив недели</div>
+          <div class="muted small">Эти предметы доступны только до конца текущей недели — потом сменятся на другие.</div>
+        </div>
+        <div class="shop-type-filters" id="shopTypeFilters"></div>
+        <div id="shopGrid" class="shop-grid"></div>
+      </div>
+
+      <!-- BOXES -->
+      <div class="game-panel" id="shoptab-boxes">
+        <div class="card">
+          <div class="card-title">📦 Ежедневный бесплатный кейс</div>
+          <div class="muted small" style="margin-bottom:10px;">Один бесплатный кейс раз в сутки — небольшая награда очками.</div>
+          <button class="btn btn-secondary btn-big" id="dailyCaseBtn">🎁 Забрать бесплатный кейс</button>
+        </div>
+        <div id="mysteryBoxGrid" class="mystery-box-grid"></div>
+      </div>
+
+      <!-- WHEEL -->
+      <div class="game-panel" id="shoptab-wheel">
+        <div class="card wheel-card">
+          <div class="card-title">🎡 Колесо удачи</div>
+          <div class="wheel-visual" id="wheelVisual">🎡</div>
+          <div class="wheel-result muted small" id="wheelResult">Крути колесо — множитель ставки от x0 до x10!</div>
+          <div class="muted small" id="wheelFreeHint" style="margin-bottom:10px;"></div>
+          <button class="btn btn-primary btn-big" id="wheelFreeSpinBtn">🎁 Бесплатный спин</button>
+          <button class="btn btn-secondary btn-big" id="wheelPaidSpinBtn" style="margin-top:8px;">Спин за <span id="wheelCostLabel">1000</span> ✦</button>
+        </div>
+      </div>
+
+      <!-- BOOSTERS -->
+      <div class="game-panel" id="shoptab-boosters">
+        <div class="card" id="activeBoosterCard" style="display:none;">
+          <div class="card-title">⚡ Активный бустер</div>
+          <div class="muted small" id="activeBoosterText"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">🪙 Бустеры XP</div>
+          <div class="muted small" style="margin-bottom:10px;">Ускоряют прокачку уровня дракона (не влияют на количество Purio Points).</div>
+          <div id="boosterGrid" class="mystery-box-grid"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">🔥 Защита стрика</div>
+          <div class="muted small" style="margin-bottom:10px;">
+            Заряды: <b id="shieldCount">0</b>. Если пропустишь день — серия входов не сгорит,
+            потратится один заряд защиты.
+          </div>
+          <button class="btn btn-secondary btn-big" id="buyShieldBtn"></button>
+        </div>
+      </div>
+    </section>
+
   </main>
 
   <!-- ===== BOTTOM NAV ===== -->
@@ -231,9 +388,59 @@
     <button class="nav-btn active" data-page="home"><span class="nav-ico">🏠</span><span>Главная</span></button>
     <button class="nav-btn" data-page="tasks"><span class="nav-ico">📋</span><span>Задания</span></button>
     <button class="nav-btn" data-page="vpn"><span class="nav-ico">🌐</span><span>VPN</span></button>
+    <button class="nav-btn" data-page="tap"><span class="nav-ico">👆</span><span>Тапалка</span></button>
     <button class="nav-btn" data-page="casino"><span class="nav-ico">🎰</span><span>Казино</span></button>
     <button class="nav-btn" data-page="profile"><span class="nav-ico">👤</span><span>Профиль</span></button>
   </nav>
+</div>
+
+<!-- ===== TOPUP MODAL ===== -->
+<div class="modal" id="rewardModal">
+  <div class="modal-backdrop" id="rewardBackdrop"></div>
+  <div class="modal-sheet">
+    <div class="modal-header">
+      <div class="modal-title" id="rewardTitle">🎉 Награда</div>
+      <button class="modal-close" id="rewardCloseBtn">✕</button>
+    </div>
+    <div class="reward-modal-icon" id="rewardIcon">🎁</div>
+    <div class="reward-modal-text" id="rewardText"></div>
+    <div class="reward-modal-sub" id="rewardSub"></div>
+    <button class="btn btn-primary btn-big" id="rewardOkBtn">Отлично!</button>
+  </div>
+</div>
+
+<div class="modal" id="topupModal">
+  <div class="modal-backdrop" id="topupBackdrop"></div>
+  <div class="modal-sheet">
+    <div class="modal-header">
+      <div class="modal-title">💳 Пополнение баланса</div>
+      <button class="modal-close" id="topupCloseBtn">✕</button>
+    </div>
+
+    <div class="modal-step" id="topupStepInput">
+      <div class="muted small" style="margin-bottom:10px;">Укажи сумму пополнения в рублях — оплата пройдёт через СБП.</div>
+      <div class="bet-input-wrap" style="margin-bottom:10px;">
+        <span>₽</span>
+        <input type="number" id="topupAmount" value="100" min="1" style="width:100%;">
+      </div>
+      <div class="bet-quick" id="topupQuick" style="margin-bottom:14px;"></div>
+      <button class="btn btn-primary btn-big" id="topupSubmitBtn">Оплатить через СБП</button>
+    </div>
+
+    <div class="modal-step" id="topupStepWaiting" style="display:none;">
+      <div class="topup-spinner"></div>
+      <div class="muted small" style="text-align:center; margin:10px 0;">
+        Ожидаем оплату… Заверши платёж в открывшемся окне, баланс пополнится автоматически.
+      </div>
+      <button class="btn btn-secondary btn-big" id="topupCheckBtn">🔄 Проверить оплату</button>
+    </div>
+
+    <div class="modal-step" id="topupStepDone" style="display:none;">
+      <div class="topup-success">✅</div>
+      <div class="muted small" style="text-align:center; margin:10px 0;" id="topupDoneText">Баланс пополнен!</div>
+      <button class="btn btn-primary btn-big" id="topupDoneBtn">Готово</button>
+    </div>
+  </div>
 </div>
 
 <!-- Purple dragon mascot, reused everywhere via <use> -->
