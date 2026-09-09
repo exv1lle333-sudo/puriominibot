@@ -242,6 +242,51 @@ input[type=range]{ width:100%; accent-color: var(--accent); margin-bottom:12px; 
 .bottom-nav .nav-btn{ font-size:9px; padding:4px 0; }
 .bottom-nav .nav-btn span:last-child{ white-space:nowrap; }
 
+/* Было 6 кнопок в ряд с мелким шрифтом — оставили 3 (Главная/Казино/Профиль),
+   Задания и VPN теперь открываются карточками из Профиля. Кнопки крупнее. */
+.bottom-nav-3 .nav-btn{ font-size:12px; padding:6px 0; }
+.bottom-nav-3 .nav-ico{ font-size:23px; }
+
+/* ---------- ГЛАВНАЯ / ТАПАЛКА (в стиле tap-to-earn игр) ---------- */
+.hamster-stats-row{
+  display:flex; justify-content:space-between; gap:8px;
+  padding: 4px 4px 14px;
+}
+.hamster-stat{ display:flex; flex-direction:column; align-items:center; flex:1; }
+.hamster-stat-label{ font-size:10px; color: var(--muted); text-transform:uppercase; letter-spacing:.03em; }
+.hamster-stat-val{ font-size:15px; font-weight:800; color:#fff; margin-top:2px; }
+
+.home-tap-wrap{ display:flex; flex-direction:column; align-items:center; padding: 6px 0 4px; }
+
+/* Дракон без карточки-рамки — просто на подсветке, как монета в hamster-style играх */
+.tap-stage-hamster{
+  position:relative; width:210px; height:210px;
+  display:flex; align-items:center; justify-content:center;
+  touch-action: manipulation; user-select:none; margin-bottom:10px;
+}
+.tap-stage-hamster::before{
+  content:""; position:absolute; inset:6px; border-radius:50%;
+  background: radial-gradient(circle, #7c3aed3d, transparent 70%);
+  filter: blur(4px); z-index:0;
+}
+.tap-stage-hamster .level-ring-hamster{ position:absolute; inset:0; width:100%; height:100%; transform: rotate(-90deg); z-index:1; }
+.tap-stage-hamster .tap-dragon{ width:175px; height:175px; z-index:2; cursor:pointer; filter: drop-shadow(0 10px 22px #7c3aed55); }
+
+.tap-round-btn{
+  width:84px; height:84px; border-radius:50%; border:none; cursor:pointer;
+  background: radial-gradient(circle at 35% 30%, #a855f7, #6d28d9 65%);
+  box-shadow: 0 6px 0 #4c1d95, 0 10px 20px #00000055;
+  color:#fff; font-size:22px; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:1px; margin-bottom:12px; touch-action: manipulation; user-select:none;
+}
+.tap-round-btn span{ font-size:10px; font-weight:800; letter-spacing:.05em; }
+.tap-round-btn:active{ transform: translateY(4px); box-shadow: 0 2px 0 #4c1d95, 0 4px 10px #00000055; }
+
+.xp-bar-slim{ width:190px; margin: 0 auto; }
+
+.tap-meters{ padding: 10px 6px 0; }
+.tap-meter-row{ display:flex; justify-content:space-between; font-size:12px; color:var(--muted); margin-bottom:4px; }
+
 /* ---------- TOAST ---------- */
 .toast{
   position: fixed; top: 10px; left:50%; transform: translateX(-50%) translateY(-140%);
@@ -288,10 +333,8 @@ input[type=range]{ width:100%; accent-color: var(--accent); margin-bottom:12px; 
 .crash-status{ font-size:12px; color:var(--muted); margin-bottom:10px; min-height:16px; font-weight:600; }
 .crash-cashout-btn{ background: linear-gradient(135deg, #10b981, #34d399) !important; }
 
-/* ---------- TAP PAGE ---------- */
-.tap-energy-card{ padding-bottom:14px; }
+/* ---------- TAP (дракон-тапалка на Главной) ---------- */
 .tap-cap-fill{ background: linear-gradient(90deg, var(--gold), #fde68a); }
-.tap-stage-card{ display:flex; flex-direction:column; align-items:center; padding:26px 16px; user-select:none; }
 .tap-stage{ position:relative; width:180px; height:180px; touch-action: manipulation; }
 .tap-dragon{ width:180px; height:180px; cursor:pointer; transition: transform .08s ease; filter: drop-shadow(0 8px 18px #7c3aed66); }
 .tap-dragon:active{ transform: scale(0.92); }
@@ -406,124 +449,3 @@ input[type=range]{ width:100%; accent-color: var(--accent); margin-bottom:12px; 
 .reward-modal-icon{ font-size:52px; text-align:center; margin:6px 0 4px 0; }
 .reward-modal-text{ text-align:center; font-weight:800; font-size:16px; margin-bottom:4px; }
 .reward-modal-sub{ text-align:center; color:var(--muted); font-size:12px; margin-bottom:10px; }
-<<<<<<< HEAD
-
-/* PURIO_UI_V3 */
-.app {
-  min-height: 100vh;
-  min-height: 100dvh;
-  max-width: 680px;
-  margin-inline: auto;
-}
-.content { padding-bottom: calc(96px + var(--safe-bottom)); }
-.bottom-nav {
-  left: 50%;
-  right: auto;
-  transform: translateX(-50%);
-  width: 100%;
-  max-width: 680px;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-  padding: 9px 14px calc(9px + var(--safe-bottom));
-}
-.bottom-nav .nav-btn {
-  min-height: 52px;
-  font-size: 12px;
-  gap: 4px;
-  border-radius: 15px;
-  cursor: pointer;
-}
-.bottom-nav .nav-btn.active {
-  background: #a855f71c;
-  color: #debbff;
-}
-.bottom-nav .nav-ico { font-size: 23px; }
-.purio-links {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-  margin-bottom: 14px;
-}
-.purio-links button {
-  min-height: 46px;
-  padding: 8px 5px;
-  font-size: 12px;
-}
-.tap-stage-card {
-  overflow: hidden;
-  position: relative;
-  padding: 18px 10px;
-  background:
-    radial-gradient(ellipse at 50% 45%, #8043c045, transparent 68%),
-    linear-gradient(160deg, #271b40, #161022);
-}
-.tap-stage {
-  width: min(100%, 310px);
-  height: auto;
-  aspect-ratio: 1;
-  display: grid;
-  place-items: center;
-  isolation: isolate;
-  cursor: pointer;
-  touch-action: none;
-  user-select: none;
-  -webkit-user-select: none;
-  -webkit-touch-callout: none;
-  border-radius: 50%;
-  outline-offset: 4px;
-  background:
-    radial-gradient(circle, #bd83ff18 0 55%, transparent 56%),
-    radial-gradient(circle, transparent 62%, #c89bff24 63%, transparent 64%);
-}
-.tap-stage::after {
-  content: "";
-  position: absolute;
-  width: 54%;
-  height: 8%;
-  left: 23%;
-  bottom: 4%;
-  background: #09041280;
-  border-radius: 50%;
-  filter: blur(8px);
-  z-index: -1;
-}
-.tap-dragon {
-  display: block;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  transform-origin: 50% 80%;
-  transition: transform .09s ease-out;
-  filter: drop-shadow(0 12px 16px #06020b60);
-}
-.tap-dragon:active { transform: none; }
-.tap-dragon.pressed { transform: scale(.945) translateY(3px); }
-.purio-accessory { pointer-events: none; }
-.tap-hint { min-height: 18px; text-align: center; line-height: 1.45; }
-.tap-energy-card .xp-fill { transition: width .12s linear; }
-.dragon-card { padding: 12px 16px; }
-.dragon-mini { overflow: visible; }
-.promo-row input, .ref-link-row input { min-width: 0; width: 0; }
-.support-row { flex-wrap: wrap; }
-.support-row .btn { min-width: 120px; }
-.modal-sheet { max-height: 90dvh; overflow-y: auto; }
-button:focus-visible, a:focus-visible, [role="button"]:focus-visible {
-  outline: 2px solid #ddb5ff;
-  outline-offset: 3px;
-}
-button:disabled { opacity: .45; cursor: default; }
-@media (max-width: 360px) {
-  .content { padding-inline: 10px; }
-  .card { padding: 12px; }
-  .promo-row { flex-direction: column; }
-  .promo-row input { width: 100%; }
-  .bet-row { flex-wrap: wrap; }
-  .bet-quick { min-width: 140px; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .page, .modal-sheet, .tap-float { animation: none; }
-  .tap-dragon, .xp-fill { transition: none; }
-}
-=======
->>>>>>> df6d2d6e09f4f0a797a32b4b9b2236764894ba91

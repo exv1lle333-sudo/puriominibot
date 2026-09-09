@@ -53,48 +53,6 @@ function fmtDate(ts) {
 
 // ===================== NAV =====================
 const Nav = {
-<<<<<<< HEAD
-  async go(page) {
-    if (page === "tap") page = "home";
-    const target = document.getElementById("page-" + page);
-    if (!target) {
-      toast("Раздел не найден");
-      return;
-    }
-    haptic();
-    document.querySelectorAll(".page").forEach(p => {
-      p.classList.toggle("active", p === target);
-    });
-    const parent = {
-      tasks: "home",
-      casino: "home",
-      shop: "profile",
-    }[page] || page;
-    document.querySelectorAll(".nav-btn").forEach(b => {
-      const active = b.dataset.page === parent;
-      b.classList.toggle("active", active);
-      if (active) b.setAttribute("aria-current", "page");
-      else b.removeAttribute("aria-current");
-    });
-    window.scrollTo({ top: 0, behavior: "auto" });
-    try {
-      if (page === "home") {
-        await loadState();
-        await loadTap();
-      }
-      if (page === "tasks") await loadTasks();
-      if (page === "vpn") await loadVpn();
-      if (page === "casino") await loadCasino();
-      if (page === "profile") await loadProfile();
-      if (page === "shop") await loadShop();
-    } catch (e) {
-      toast(e.message || "Не удалось загрузить раздел");
-    }
-  }
-};
-document.querySelectorAll(".nav-btn").forEach(btn => {
-  btn.addEventListener("click", () => Nav.go(btn.dataset.page));
-=======
   go(page) {
     document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
     document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
@@ -107,7 +65,7 @@ document.querySelectorAll(".nav-btn").forEach(btn => {
     if (navBtn) navBtn.classList.add("active");
     if (page === "tasks") loadTasks();
     if (page === "vpn") loadVpn();
-    if (page === "tap") loadTap();
+    if (page === "home") loadTap();
     if (page === "casino") loadCasino();
     if (page === "profile") loadProfile();
     if (page === "shop") loadShop();
@@ -115,7 +73,6 @@ document.querySelectorAll(".nav-btn").forEach(btn => {
 };
 document.querySelectorAll(".nav-btn").forEach(btn => {
   btn.addEventListener("click", () => { haptic(); Nav.go(btn.dataset.page); });
->>>>>>> df6d2d6e09f4f0a797a32b4b9b2236764894ba91
 });
 
 // ===================== DRAGON SKINS (visual filters) =====================
@@ -128,118 +85,6 @@ const SKIN_FILTERS = {
   storm: "hue-rotate(150deg) saturate(1.6) brightness(1.05)",
   cosmic: "hue-rotate(-90deg) saturate(2) brightness(1.15)",
 };
-<<<<<<< HEAD
-// Аксессуары рисуются отдельно от тела: фильтр скина их не перекрашивает.
-const PURIO_CLOTHES = {
-  cloth_scarf_red: {
-    front: `
-      <path d="M111 118 L132 123 L126 157 L113 151Z"
-            fill="#db274d" stroke="#921b3b" stroke-width="2"/>
-      <path d="M65 109 Q100 123 135 109 L136 121
-               Q100 139 64 121Z"
-            fill="#fa4560" stroke="#a02041" stroke-width="2"/>
-      <path d="M70 115 Q100 128 129 115"
-            fill="none" stroke="#ff98a5" stroke-width="3"/>
-      <path d="M116 144 L128 149 M115 149 L127 154"
-            stroke="#ffadb6" stroke-width="2"/>
-    `
-  },
-  cloth_glasses: {
-    front: `
-      <g fill="#21182f" stroke="#e1cef5" stroke-width="3">
-        <path d="M59 64 L94 64 L91 83 Q76 94 62 81Z"/>
-        <path d="M106 64 L141 64 L138 81 Q124 94 109 83Z"/>
-      </g>
-      <path d="M94 69 Q100 64 106 69 M51 64 L59 67 M141 67 L149 64"
-            fill="none" stroke="#eee0ff" stroke-width="3"/>
-      <path d="M67 69 L78 82 M115 69 L126 82"
-            stroke="#9786bd" stroke-width="3"/>
-    `
-  },
-  cloth_pilot_cap: {
-    front: `
-      <path d="M60 49 Q64 23 102 24 Q139 26 143 51Z"
-            fill="#4756c5" stroke="#283477" stroke-width="2"/>
-      <path d="M58 49 Q107 39 145 49 L151 56 Q102 51 58 58Z"
-            fill="#7787f4" stroke="#283477" stroke-width="2"/>
-      <path d="M96 27 L103 43" stroke="#a9b8ff" stroke-width="3"/>
-      <circle cx="115" cy="37" r="6" fill="#f9d578"/>
-    `
-  },
-  cloth_cape_hero: {
-    back: `
-      <path d="M64 109 Q100 119 136 109 L158 179
-               Q125 169 100 184 Q75 169 42 179Z"
-            fill="#d02d64" stroke="#861743" stroke-width="3"/>
-      <path d="M72 119 L60 167 M128 119 L140 167"
-            stroke="#f56a95" stroke-width="3"/>
-    `,
-    front: `<circle cx="100" cy="119" r="6" fill="#ffda75"
-                    stroke="#b67d28" stroke-width="2"/>`
-  },
-  cloth_crown_mini: {
-    front: `
-      <path d="M72 42 L67 18 L87 29 L100 9 L113 29 L133 18 L128 42Z"
-            fill="#ffce50" stroke="#b27b22" stroke-width="2"/>
-      <path d="M73 39 L127 39 L125 48 L75 48Z"
-            fill="#ffe28e" stroke="#b27b22" stroke-width="2"/>
-      <path d="M100 26 L105 33 L100 40 L95 33Z" fill="#c142eb"/>
-      <circle cx="80" cy="34" r="3" fill="#f05c7e"/>
-      <circle cx="120" cy="34" r="3" fill="#65dceb"/>
-    `
-  },
-  cloth_armor_gold: {
-    front: `
-      <path d="M72 122 L85 116 Q100 127 115 116 L128 122
-               L123 159 L100 173 L77 159Z"
-            fill="#e9b844" stroke="#946122" stroke-width="3"/>
-      <path d="M100 126 L100 163 M80 142 L120 142"
-            stroke="#ffe6a0" stroke-width="3"/>
-      <path d="M100 132 L107 142 L100 153 L93 142Z"
-            fill="#9b4de0" stroke="#ffe49a" stroke-width="2"/>
-      <path d="M53 120 Q65 111 77 120 L72 133 L53 133Z
-               M123 120 Q135 111 147 120 L147 133 L128 133Z"
-            fill="#ffdb77" stroke="#946122" stroke-width="2"/>
-    `
-  },
-  cloth_wings_ice: {
-    back: `
-      <g fill="#a5efff" stroke="#4ca0dc" stroke-width="2">
-        <path d="M66 136 L8 73 L15 114 L28 108 L30 139
-                 L43 126 L49 153Z"/>
-        <path d="M134 136 L192 73 L185 114 L172 108 L170 139
-                 L157 126 L151 153Z"/>
-      </g>
-      <path d="M62 135 L16 88 M138 135 L184 88"
-            stroke="#efffff" stroke-width="3"/>
-    `
-  }
-};
-
-function applyEquippedSkinVisuals(skinCode) {
-  const clothing = STATE?.cosmetics?.equipped?.clothing || "";
-  const art = PURIO_CLOTHES[clothing] || {};
-  const filter = SKIN_FILTERS[skinCode] || "";
-  [
-    document.getElementById("dragonBig"),
-    document.getElementById("tapDragon"),
-    document.querySelector("#topDragon .dragon-mini"),
-  ].forEach(el => {
-    if (!el) return;
-    el.setAttribute("viewBox", "0 0 200 200");
-
-    // Только константная SVG-разметка. Данные API не вставляются в HTML.
-    const key = skinCode + "|" + clothing;
-    if (el.dataset.purioLook === key) return;
-    el.dataset.purioLook = key;
-    el.style.removeProperty("filter");
-    el.innerHTML = `
-      <g class="purio-accessory">${art.back || ""}</g>
-      <g class="purio-body"><use href="#dragon-svg"/></g>
-      <g class="purio-accessory">${art.front || ""}</g>
-    `;
-    el.querySelector(".purio-body").style.filter = filter || "none";
-=======
 function applyEquippedSkinVisuals(skinCode) {
   const filter = SKIN_FILTERS[skinCode] || "";
   const dragonEls = [
@@ -249,8 +94,17 @@ function applyEquippedSkinVisuals(skinCode) {
   ];
   dragonEls.forEach(el => {
     if (el) el.style.filter = filter ? filter + " drop-shadow(0 4px 10px #7c3aed55)" : "";
->>>>>>> df6d2d6e09f4f0a797a32b4b9b2236764894ba91
   });
+}
+
+// Надетая одежда из Purio Shop — раньше покупка/экипировка сохранялась в БД,
+// но нигде не отрисовывалась на самом драконе. Символы cosm-<code> лежат
+// в index.html рядом с #dragon-svg.
+function applyEquippedCosmetics(equipped) {
+  const overlay = document.getElementById("dragonClothingOverlay");
+  if (!overlay) return;
+  const code = equipped && equipped.clothing;
+  overlay.setAttribute("href", code ? `#cosm-${code}` : "");
 }
 
 // ===================== HOME / STATE =====================
@@ -262,14 +116,8 @@ async function loadState() {
   renderDragon();
   renderStreak();
   renderHomeStats();
-<<<<<<< HEAD
-  void renderTasksTeaser().catch(() => {
-    document.getElementById("teaserList").textContent =
-      "Не удалось загрузить задания. Открой раздел ещё раз.";
-  });
-=======
   renderTasksTeaser();
->>>>>>> df6d2d6e09f4f0a797a32b4b9b2236764894ba91
+  applyEquippedCosmetics(STATE.cosmetics ? STATE.cosmetics.equipped : null);
 }
 
 function renderTop() {
@@ -282,7 +130,8 @@ function renderTop() {
 
 function renderDragon() {
   const d = STATE.dragon;
-  document.getElementById("homeLevelText").textContent = `· Ур. ${d.level}`;
+  document.getElementById("homeLevelText").textContent = d.level;
+  document.getElementById("homePointsVal").textContent = fmtNum(STATE.points) + " ✦";
   const pct = Math.min(100, Math.round((d.xp / d.xp_needed) * 100));
   document.getElementById("xpFill").style.width = pct + "%";
   document.getElementById("xpText").textContent = `${d.xp} / ${d.xp_needed} XP`;
@@ -364,11 +213,6 @@ async function loadTasks() {
       } catch (e) {
         haptic("error");
         toast(e.message);
-<<<<<<< HEAD
-      } finally {
-        btn.disabled = false;
-=======
->>>>>>> df6d2d6e09f4f0a797a32b4b9b2236764894ba91
       }
     });
   });
@@ -478,15 +322,6 @@ function roundRect(ctx, x, y, w, h, r) {
 // ===================== CASINO =====================
 let casinoGame = "dice";
 
-<<<<<<< HEAD
-document.querySelectorAll("#page-casino [data-game]").forEach(btn => {
-  btn.addEventListener("click", () => {
-    haptic();
-    casinoGame = btn.dataset.game;
-    document.querySelectorAll("#page-casino [data-game]").forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-    document.querySelectorAll("#page-casino .game-panel").forEach(p => p.classList.remove("active"));
-=======
 document.querySelectorAll(".tswitch").forEach(btn => {
   btn.addEventListener("click", () => {
     haptic();
@@ -494,7 +329,6 @@ document.querySelectorAll(".tswitch").forEach(btn => {
     document.querySelectorAll(".tswitch").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
     document.querySelectorAll(".game-panel").forEach(p => p.classList.remove("active"));
->>>>>>> df6d2d6e09f4f0a797a32b4b9b2236764894ba91
     document.getElementById("game-" + casinoGame).classList.add("active");
   });
 });
@@ -535,11 +369,7 @@ function crashQuickBetButtons() {
   });
 }
 
-<<<<<<< HEAD
-async function loadCasino(resume = true) {
-=======
 async function loadCasino() {
->>>>>>> df6d2d6e09f4f0a797a32b4b9b2236764894ba91
   const data = await api("/api/casino/state");
   casinoBalance = data.points;
   document.getElementById("casinoBalance").textContent = fmtNum(casinoBalance);
@@ -549,11 +379,7 @@ async function loadCasino() {
   betQuickButtons("coinBetQuick", "coinBet", () => casinoBalance);
   crashQuickBetButtons();
   renderPaytable();
-<<<<<<< HEAD
-  if (resume) await resumeCrashRound();
-=======
   await resumeCrashRound();
->>>>>>> df6d2d6e09f4f0a797a32b4b9b2236764894ba91
 }
 
 function renderPaytable() {
@@ -629,15 +455,8 @@ document.getElementById("slotSpinBtn").addEventListener("click", async () => {
 
   try {
     const spinPromise = api("/api/casino/slots", { method: "POST", body: { bet } });
-<<<<<<< HEAD
-    const [{ result, new_balance }] = await Promise.all([
-      spinPromise,
-      new Promise(r => setTimeout(r, 700)),
-    ]);
-=======
     await new Promise(r => setTimeout(r, 700)); // небольшая анимация перед результатом
     const { result, new_balance } = await spinPromise;
->>>>>>> df6d2d6e09f4f0a797a32b4b9b2236764894ba91
     reelEls.forEach((r, i) => { r.classList.remove("spin"); r.textContent = result.reels[i]; });
     casinoBalance = new_balance;
     document.getElementById("casinoBalance").textContent = fmtNum(casinoBalance);
@@ -913,11 +732,7 @@ async function finishCrashRound(autoBust) {
     document.getElementById("crashStartBtn").style.display = "";
     document.getElementById("crashCashoutBtn").style.display = "none";
 
-<<<<<<< HEAD
-    await loadCasino(false);
-=======
     await loadCasino();
->>>>>>> df6d2d6e09f4f0a797a32b4b9b2236764894ba91
     await loadState();
   } catch (e) {
     haptic("error");
@@ -932,61 +747,12 @@ async function finishCrashRound(autoBust) {
 }
 
 // ===================== TAPALKA (Purio Tap) =====================
-<<<<<<< HEAD
-// Серверное состояние + очередь ещё не отправленных тапов.
-// Запросы на начисление не повторяются автоматически: это могло бы
-// удвоить награду, если сервер обработал запрос, но ответ потерялся.
-=======
->>>>>>> df6d2d6e09f4f0a797a32b4b9b2236764894ba91
 let tapState = null;
 let tapLocalEnergy = 0;
 let tapQueue = 0;
 let tapFlushTimer = null;
 let tapTicker = null;
 let tapFlushing = false;
-<<<<<<< HEAD
-let tapLoading = false;
-let tapInFlight = 0;
-let tapLastTick = performance.now();
-let tapPulseTimer = null;
-
-function tapCanEarn(points = tapState?.day_points || 0) {
-  if (!tapState) return false;
-  return tapState.day_cap - points >= tapState.reward_per_tap;
-}
-
-async function loadTap() {
-  if (tapLoading || tapFlushing || tapQueue > 0) return;
-  tapLoading = true;
-  try {
-    tapState = await api("/api/tap/state");
-    tapLocalEnergy = tapState.energy;
-    tapLastTick = performance.now();
-    document.getElementById("tapRewardHint").textContent =
-      tapState.reward_per_tap;
-    renderTapUi();
-    if (!tapTicker) tapTicker = setInterval(tickTapEnergy, 1000);
-  } catch (e) {
-    tapState = null;
-    document.getElementById("tapHint").textContent =
-      "Не удалось загрузить тапалку. Открой раздел ещё раз.";
-    toast(e.message);
-  } finally {
-    tapLoading = false;
-  }
-}
-
-function tickTapEnergy() {
-  const now = performance.now();
-  const elapsed = Math.max(0, (now - tapLastTick) / 1000);
-  tapLastTick = now;
-  if (!tapState || tapLoading || document.hidden) return;
-  tapLocalEnergy = Math.min(
-    tapState.energy_max,
-    tapLocalEnergy + elapsed / Math.max(1, tapState.regen_seconds)
-  );
-  renderTapUi();
-=======
 
 async function loadTap() {
   try {
@@ -1008,32 +774,10 @@ function tickTapEnergy() {
     tapLocalEnergy = Math.min(tapState.energy_max, tapLocalEnergy + 1 / tapState.regen_seconds);
     renderTapUi();
   }
->>>>>>> df6d2d6e09f4f0a797a32b4b9b2236764894ba91
 }
 
 function renderTapUi() {
   if (!tapState) return;
-<<<<<<< HEAD
-  const energy = Math.max(0, Math.floor(tapLocalEnergy));
-  document.getElementById("tapEnergyVal").textContent =
-    `${energy}/${tapState.energy_max}`;
-  document.getElementById("tapEnergyFill").style.width =
-    `${Math.min(100, Math.max(0, tapLocalEnergy) /
-      Math.max(1, tapState.energy_max) * 100)}%`;
-  document.getElementById("tapDayVal").textContent =
-    `${tapState.day_points}/${tapState.day_cap}`;
-  document.getElementById("tapDayFill").style.width =
-    `${Math.min(100, tapState.day_points /
-      Math.max(1, tapState.day_cap) * 100)}%`;
-
-  const hint = document.getElementById("tapHint");
-  if (!tapCanEarn()) {
-    hint.textContent = "На сегодня всё — дневного остатка не хватает на тап.";
-  } else if (energy < 1) {
-    hint.textContent = "Энергия восстанавливается. Немного подожди ⚡";
-  } else {
-    hint.textContent = `Тапай Пурио! +${tapState.reward_per_tap} ✦ за тап`;
-=======
   const energyShown = Math.floor(tapLocalEnergy);
   document.getElementById("tapEnergyVal").textContent = `${energyShown}/${tapState.energy_max}`;
   document.getElementById("tapEnergyFill").style.width = (tapLocalEnergy / tapState.energy_max * 100) + "%";
@@ -1046,49 +790,21 @@ function renderTapUi() {
     hint.textContent = "Энергия закончилась, подожди немного";
   } else {
     hint.textContent = "Тапай дракона!";
->>>>>>> df6d2d6e09f4f0a797a32b4b9b2236764894ba91
   }
 }
 
 function spawnTapFloat(x, y) {
   const stage = document.getElementById("tapStage");
-<<<<<<< HEAD
-  if (stage.querySelectorAll(".tap-float").length >= 24) return;
-  const rect = stage.getBoundingClientRect();
-  const span = document.createElement("div");
-  span.className = "tap-float";
-  span.textContent = "+" + tapState.reward_per_tap;
-=======
   const rect = stage.getBoundingClientRect();
   const span = document.createElement("div");
   span.className = "tap-float";
   span.textContent = "+" + (tapState ? tapState.reward_per_tap : 1);
->>>>>>> df6d2d6e09f4f0a797a32b4b9b2236764894ba91
   span.style.left = (x - rect.left) + "px";
   span.style.top = (y - rect.top) + "px";
   stage.appendChild(span);
   setTimeout(() => span.remove(), 850);
 }
 
-<<<<<<< HEAD
-function onTapDragon(x, y) {
-  if (!tapState || tapLoading) return;
-  if (tapLocalEnergy < 1 || !tapCanEarn()) {
-    haptic("warning");
-    return;
-  }
-
-  tapLocalEnergy -= 1;
-  tapState.day_points += tapState.reward_per_tap;
-  tapQueue += 1;
-  spawnTapFloat(x, y);
-  haptic("light");
-
-  const dragon = document.getElementById("tapDragon");
-  dragon.classList.add("pressed");
-  clearTimeout(tapPulseTimer);
-  tapPulseTimer = setTimeout(() => dragon.classList.remove("pressed"), 90);
-=======
 function onTapDragon(clientX, clientY) {
   if (!tapState) return;
   if (tapLocalEnergy < 1) { haptic("warning"); return; }
@@ -1105,102 +821,11 @@ function onTapDragon(clientX, clientY) {
   void dragon.offsetWidth;
   dragon.classList.add("pulse");
 
->>>>>>> df6d2d6e09f4f0a797a32b4b9b2236764894ba91
   renderTapUi();
   scheduleTapFlush();
 }
 
 function scheduleTapFlush() {
-<<<<<<< HEAD
-  if (tapFlushTimer || tapFlushing || tapQueue <= 0) return;
-  tapFlushTimer = setTimeout(() => {
-    tapFlushTimer = null;
-    void flushTaps();
-  }, 400);
-}
-
-async function flushTaps() {
-  if (!tapState || tapFlushing || tapQueue <= 0) return;
-  clearTimeout(tapFlushTimer);
-  tapFlushTimer = null;
-
-  const count = tapQueue;
-  tapQueue = 0;
-  tapInFlight = count;
-  tapFlushing = true;
-  let failed = false;
-
-  try {
-    const res = await api("/api/tap", {
-      method: "POST",
-      body: { count },
-    });
-
-    // Новые тапы во время запроса остаются в очереди и не теряются
-    // при применении ответа сервера.
-    const reward = res.reward_per_tap;
-    tapState = {
-      ...tapState,
-      energy: res.energy,
-      energy_max: res.energy_max,
-      regen_seconds: res.regen_seconds,
-      reward_per_tap: reward,
-      day_points: Math.min(res.day_cap, res.day_points + tapQueue * reward),
-      day_cap: res.day_cap,
-    };
-    tapLocalEnergy = Math.max(0, res.energy - tapQueue);
-    tapLastTick = performance.now();
-    document.getElementById("tapRewardHint").textContent = reward;
-    document.getElementById("topPointsValue").textContent =
-      fmtNum(res.new_balance);
-    if (STATE) STATE.points = res.new_balance;
-    renderTapUi();
-  } catch (e) {
-    failed = true;
-    // Без серверного idempotency key повторять неопределённый
-    // запрос небезопасно. Перечитываем подтверждённое состояние.
-    tapQueue = 0;
-    tapState = null;
-    toast("Связь прервалась. Обновляем подтверждённые сервером очки.");
-  } finally {
-    tapInFlight = 0;
-    tapFlushing = false;
-    if (failed) {
-      await loadTap();
-      try { await loadState(); } catch (e) { toast(e.message); }
-    } else if (tapQueue > 0) {
-      scheduleTapFlush();
-    }
-  }
-}
-
-const tapStageEl = document.getElementById("tapStage");
-tapStageEl.setAttribute("role", "button");
-tapStageEl.setAttribute("tabindex", "0");
-tapStageEl.setAttribute("aria-label", "Тапнуть дракона Пурио");
-
-tapStageEl.addEventListener("pointerdown", e => {
-  if (e.pointerType === "mouse" && e.button !== 0) return;
-  e.preventDefault();
-  onTapDragon(e.clientX, e.clientY);
-});
-tapStageEl.addEventListener("keydown", e => {
-  if ((e.key !== "Enter" && e.key !== " ") || e.repeat) return;
-  e.preventDefault();
-  const r = tapStageEl.getBoundingClientRect();
-  onTapDragon(r.left + r.width / 2, r.top + r.height / 2);
-});
-tapStageEl.addEventListener("contextmenu", e => e.preventDefault());
-
-document.addEventListener("visibilitychange", () => {
-  tapLastTick = performance.now();
-  if (document.hidden) {
-    void flushTaps();
-  } else if (!tapFlushing && tapQueue === 0) {
-    void loadTap();
-  }
-});
-=======
   if (tapFlushTimer) return;
   tapFlushTimer = setTimeout(flushTaps, 700);
 }
@@ -1238,8 +863,14 @@ tapDragonEl.addEventListener("touchstart", (e) => {
   for (const t of e.changedTouches) onTapDragon(t.clientX, t.clientY);
 }, { passive: false });
 
+const tapRoundBtnEl = document.getElementById("tapRoundBtn");
+tapRoundBtnEl.addEventListener("click", (e) => onTapDragon(e.clientX, e.clientY));
+tapRoundBtnEl.addEventListener("touchstart", (e) => {
+  e.preventDefault();
+  for (const t of e.changedTouches) onTapDragon(t.clientX, t.clientY);
+}, { passive: false });
+
 window.addEventListener("beforeunload", () => { if (tapQueue > 0) flushTaps(); });
->>>>>>> df6d2d6e09f4f0a797a32b4b9b2236764894ba91
 
 // ===================== TOPUP (пополнение баланса) =====================
 let topupTxId = null;
@@ -1350,6 +981,18 @@ async function loadProfile() {
   document.getElementById("profLevel").textContent = STATE ? STATE.dragon.level : "1";
   document.getElementById("profPoints").textContent = STATE ? fmtNum(STATE.points) : "0";
 
+  const subLinkBtn = document.getElementById("subLinkBtn");
+  if (p.subscription_url) {
+    subLinkBtn.href = p.subscription_url;
+    subLinkBtn.style.display = "";
+  } else {
+    subLinkBtn.style.display = "none";
+  }
+
+  document.getElementById("vpnTeaserStatus").textContent = p.subscription_active
+    ? "Активна до " + fmtDate(p.subscription_expires_at)
+    : "Не активна — загляни в тарифы";
+
   document.getElementById("refCount").textContent = p.referral_count;
   document.getElementById("refPaid").textContent = p.referral_paid_count;
   document.getElementById("refEarned").textContent = fmtNum(p.referral_earned) + " ₽";
@@ -1358,32 +1001,6 @@ async function loadProfile() {
   document.getElementById("supportLink").href = "https://t.me/" + (p.support_username || "").replace("@", "");
   document.getElementById("channelLink").href = p.channel_link || "#";
 
-<<<<<<< HEAD
-
-  document.getElementById("refCopyBtn").onclick = async () => {
-    const input = document.getElementById("refLinkInput");
-    if (!/^https:\/\/t\.me\//i.test(input.value)) {
-      toast("Реферальная ссылка пока недоступна");
-      return;
-    }
-    try {
-      if (!navigator.clipboard?.writeText) {
-        throw new Error("clipboard unavailable");
-      }
-      await navigator.clipboard.writeText(input.value);
-      haptic("success");
-      toast("Ссылка скопирована!");
-    } catch (e) {
-      input.focus();
-      input.select();
-      input.setSelectionRange(0, input.value.length);
-      toast("Не удалось скопировать автоматически. Скопируй выделенную ссылку.");
-    }
-  };
-
-
-
-=======
   document.getElementById("refCopyBtn").onclick = () => {
     const input = document.getElementById("refLinkInput");
     input.select();
@@ -1392,7 +1009,6 @@ async function loadProfile() {
     toast("Ссылка скопирована!");
   };
 
->>>>>>> df6d2d6e09f4f0a797a32b4b9b2236764894ba91
   renderSkins();
 }
 
@@ -1620,19 +1236,7 @@ function renderShopGrid() {
   });
 
   grid.querySelectorAll("[data-action]").forEach(btn => {
-<<<<<<< HEAD
-    btn.addEventListener("click", async () => {
-      if (btn.disabled) return;
-      btn.disabled = true;
-      try {
-        await handleShopItemAction(btn.dataset);
-      } finally {
-        btn.disabled = false;
-      }
-    });
-=======
     btn.addEventListener("click", () => handleShopItemAction(btn.dataset));
->>>>>>> df6d2d6e09f4f0a797a32b4b9b2236764894ba91
   });
 }
 
@@ -1653,13 +1257,8 @@ async function handleShopItemAction(ds) {
       await api("/api/shop/equip-badge", { method: "POST", body: { slot: 0, badge_code: ds.code } });
       toast("Значок надет (слот 1)");
     }
-<<<<<<< HEAD
-    await loadState();
-    await loadShop();
-=======
     await loadShop();
     await loadState();
->>>>>>> df6d2d6e09f4f0a797a32b4b9b2236764894ba91
     await loadProfile();
   } catch (e) {
     haptic("error");
@@ -1898,17 +1497,7 @@ async function loadShop() {
     toast("Не удалось авторизоваться. Открой приложение через кнопку в боте.");
     return;
   }
-<<<<<<< HEAD
-  try {
-    await loadState();
-    await loadExchangeInfo();
-    await loadTap();
-  } catch (e) {
-    console.error("initial load failed", e);
-    toast("Не удалось загрузить приложение. Закрой и открой его ещё раз.");
-  }
-=======
   await loadState();
+  await loadTap();
   await loadExchangeInfo();
->>>>>>> df6d2d6e09f4f0a797a32b4b9b2236764894ba91
 })();
