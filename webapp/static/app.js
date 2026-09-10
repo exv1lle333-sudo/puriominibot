@@ -863,13 +863,6 @@ tapDragonEl.addEventListener("touchstart", (e) => {
   for (const t of e.changedTouches) onTapDragon(t.clientX, t.clientY);
 }, { passive: false });
 
-const tapRoundBtnEl = document.getElementById("tapRoundBtn");
-tapRoundBtnEl.addEventListener("click", (e) => onTapDragon(e.clientX, e.clientY));
-tapRoundBtnEl.addEventListener("touchstart", (e) => {
-  e.preventDefault();
-  for (const t of e.changedTouches) onTapDragon(t.clientX, t.clientY);
-}, { passive: false });
-
 window.addEventListener("beforeunload", () => { if (tapQueue > 0) flushTaps(); });
 
 // ===================== TOPUP (пополнение баланса) =====================
