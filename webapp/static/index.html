@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Purio App</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<link rel="stylesheet" href="/static/style.css?v=2">
+<link rel="stylesheet" href="/static/style.css?v=4">
 </head>
 <body>
 
@@ -16,7 +16,7 @@
   <!-- ===== HEADER ===== -->
   <header class="topbar">
     <div class="topbar-dragon" id="topDragon">
-      <svg viewBox="0 0 64 64" class="dragon-mini"><use href="#dragon-svg"/></svg>
+      <img src="/static/img/dragon-hero.png" class="dragon-mini" alt="">
       <span class="lvl-chip" id="topLevel">1</span>
     </div>
     <div class="topbar-title">
@@ -45,8 +45,8 @@
             <circle cx="60" cy="60" r="52" class="ring-bg"/>
             <circle cx="60" cy="60" r="52" class="ring-fg" id="ringFg"/>
           </svg>
-          <svg viewBox="0 0 200 200" class="dragon-big tap-dragon" id="tapDragon">
-            <use href="#dragon-svg"/>
+          <img src="/static/img/dragon-hero.png" class="dragon-big tap-dragon" id="tapDragon" alt="">
+          <svg class="dragon-clothing-layer" viewBox="0 0 551 579" preserveAspectRatio="xMidYMid meet">
             <use href="" id="dragonClothingOverlay"/>
           </svg>
         </div>
@@ -458,40 +458,40 @@
       <ellipse cx="135" cy="120" rx="16" ry="10" fill="#e9d5ff" opacity="0.85"/>
     </symbol>
 
-    <!-- Одежда/аксессуары из Purio Shop, накладываются поверх dragon-svg -->
-    <symbol id="cosm-cloth_scarf_red" viewBox="0 0 200 200">
-      <path d="M48 76 Q78 100 112 80 Q102 96 84 99 Q96 116 80 128 Q68 108 63 93 Q53 88 48 76Z" fill="#dc2626" stroke="#7f1d1d" stroke-width="1.5"/>
-      <path d="M63 93 Q57 114 66 132 Q75 123 72 104Z" fill="#ef4444" stroke="#7f1d1d" stroke-width="1"/>
+    <!-- Одежда/аксессуары из Purio Shop, накладываются поверх dragon-hero.png (кроп 551x579) -->
+    <symbol id="cosm-cloth_scarf_red" viewBox="0 0 551 579">
+      <path d="M175 278 Q250 315 330 285 Q305 310 265 316 Q290 345 255 368 Q225 335 210 305 Q185 298 175 278Z" fill="#dc2626" stroke="#7f1d1d" stroke-width="3"/>
+      <path d="M210 305 Q195 340 215 372 Q235 358 228 320Z" fill="#ef4444" stroke="#7f1d1d" stroke-width="2"/>
     </symbol>
-    <symbol id="cosm-cloth_glasses" viewBox="0 0 200 200">
-      <circle cx="58" cy="55" r="10" fill="#ffffff22" stroke="#1b0f2e" stroke-width="3"/>
-      <circle cx="81" cy="51" r="9" fill="#ffffff22" stroke="#1b0f2e" stroke-width="3"/>
-      <path d="M68 53 Q75 48 72 55" stroke="#1b0f2e" stroke-width="3" fill="none"/>
+    <symbol id="cosm-cloth_glasses" viewBox="0 0 551 579">
+      <circle cx="215" cy="194" r="28" fill="#ffffff22" stroke="#1b0f2e" stroke-width="7"/>
+      <circle cx="317" cy="178" r="26" fill="#ffffff22" stroke="#1b0f2e" stroke-width="7"/>
+      <path d="M241 188 Q280 172 292 182" stroke="#1b0f2e" stroke-width="7" fill="none"/>
     </symbol>
-    <symbol id="cosm-cloth_pilot_cap" viewBox="0 0 200 200">
-      <path d="M38 44 Q68 12 102 40 Q94 26 68 25 Q42 26 38 44Z" fill="#92400e"/>
-      <circle cx="44" cy="41" r="5" fill="#78350f"/>
-      <circle cx="96" cy="37" r="5" fill="#78350f"/>
-      <path d="M40 44 Q70 30 100 42" stroke="#78350f" stroke-width="2" fill="none"/>
+    <symbol id="cosm-cloth_pilot_cap" viewBox="0 0 551 579">
+      <path d="M120 95 Q250 5 375 85 Q345 45 250 42 Q150 45 120 95Z" fill="#92400e"/>
+      <circle cx="140" cy="88" r="14" fill="#78350f"/>
+      <circle cx="358" cy="75" r="14" fill="#78350f"/>
+      <path d="M124 95 Q250 55 372 88" stroke="#78350f" stroke-width="5" fill="none"/>
     </symbol>
-    <symbol id="cosm-cloth_cape_hero" viewBox="0 0 200 200">
-      <path d="M102 88 Q145 108 133 172 Q112 150 96 160 Q100 118 102 88Z" fill="#2563eb" opacity="0.92" stroke="#1e3a8a" stroke-width="1.5"/>
+    <symbol id="cosm-cloth_cape_hero" viewBox="0 0 551 579">
+      <path d="M370 300 Q470 340 445 520 Q400 470 355 490 Q365 390 370 300Z" fill="#2563eb" opacity="0.92" stroke="#1e3a8a" stroke-width="3"/>
     </symbol>
-    <symbol id="cosm-cloth_crown_mini" viewBox="0 0 200 200">
-      <path d="M48 33 L57 17 L66 31 L75 15 L84 31 L91 20 L95 36 L47 36Z" fill="#facc15" stroke="#a16207" stroke-width="1.5"/>
-      <circle cx="66" cy="24" r="2.5" fill="#fff"/>
+    <symbol id="cosm-cloth_crown_mini" viewBox="0 0 551 579">
+      <path d="M165 32 L192 -18 L218 30 L248 -22 L278 30 L300 -8 L312 40 L160 40Z" fill="#facc15" stroke="#a16207" stroke-width="3"/>
+      <circle cx="238" cy="10" r="7" fill="#fff"/>
     </symbol>
-    <symbol id="cosm-cloth_armor_gold" viewBox="0 0 200 200">
-      <path d="M74 94 Q100 84 127 94 Q130 122 100 132 Q71 122 74 94Z" fill="#eab308" stroke="#a16207" stroke-width="2"/>
-      <circle cx="100" cy="110" r="6" fill="#fde68a"/>
+    <symbol id="cosm-cloth_armor_gold" viewBox="0 0 551 579">
+      <path d="M195 345 Q260 320 330 345 Q338 415 260 445 Q188 415 195 345Z" fill="#eab308" stroke="#a16207" stroke-width="4"/>
+      <circle cx="262" cy="385" r="14" fill="#fde68a"/>
     </symbol>
-    <symbol id="cosm-cloth_wings_ice" viewBox="0 0 200 200">
-      <path d="M150 130 Q198 98 191 66 Q163 82 148 118Z" fill="#93c5fd" opacity="0.88" stroke="#3b82f6" stroke-width="1"/>
-      <path d="M53 90 Q10 62 16 34 Q44 50 60 84Z" fill="#93c5fd" opacity="0.88" stroke="#3b82f6" stroke-width="1"/>
+    <symbol id="cosm-cloth_wings_ice" viewBox="0 0 551 579">
+      <path d="M395 300 Q535 250 515 170 Q440 210 400 285Z" fill="#93c5fd" opacity="0.85" stroke="#3b82f6" stroke-width="2"/>
+      <path d="M155 290 Q20 245 35 165 Q112 205 150 275Z" fill="#93c5fd" opacity="0.85" stroke="#3b82f6" stroke-width="2"/>
     </symbol>
   </defs>
 </svg>
 
-<script src="/static/app.js?v=2"></script>
+<script src="/static/app.js?v=4"></script>
 </body>
 </html>

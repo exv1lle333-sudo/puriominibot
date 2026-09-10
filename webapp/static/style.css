@@ -213,8 +213,8 @@ input[type=range]{ width:100%; accent-color: var(--accent); margin-bottom:12px; 
 .skins-grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; }
 .skin-item{ background:#ffffff0a; border-radius:14px; padding:10px 6px; text-align:center; position:relative; border:1px solid transparent;}
 .skin-item.equipped{ border-color: var(--accent); }
-.skin-item svg{ width:40px; height:40px; filter: grayscale(1) opacity(0.35); }
-.skin-item.unlocked svg{ filter: var(--skin-filter, none); }
+.skin-item img{ width:40px; height:40px; object-fit:contain; filter: grayscale(1) opacity(0.35); }
+.skin-item.unlocked img{ filter: var(--skin-filter, none); }
 .skin-name{ font-size:10px; margin-top:4px; font-weight:700; }
 .skin-lock{ position:absolute; top:6px; right:6px; font-size:11px; }
 .skin-level-badge{ font-size:9px; color:var(--muted); margin-top:2px; }
@@ -270,7 +270,8 @@ input[type=range]{ width:100%; accent-color: var(--accent); margin-bottom:12px; 
   filter: blur(4px); z-index:0;
 }
 .tap-stage-hamster .level-ring-hamster{ position:absolute; inset:0; width:100%; height:100%; transform: rotate(-90deg); z-index:1; }
-.tap-stage-hamster .tap-dragon{ width:175px; height:175px; z-index:2; cursor:pointer; filter: drop-shadow(0 10px 22px #7c3aed55); }
+.tap-stage-hamster .tap-dragon{ width:175px; height:184px; z-index:2; cursor:pointer; filter: drop-shadow(0 10px 22px #7c3aed55); object-fit: contain; }
+.tap-stage-hamster .dragon-clothing-layer{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:175px; height:184px; z-index:3; pointer-events:none; }
 
 .tap-round-btn{
   width:84px; height:84px; border-radius:50%; border:none; cursor:pointer;
@@ -439,7 +440,24 @@ input[type=range]{ width:100%; accent-color: var(--accent); margin-bottom:12px; 
   font-size:64px; margin:10px 0; transition: transform 1.4s cubic-bezier(.17,.67,.3,1.01);
 }
 .wheel-visual.spinning{ transform: rotate(1440deg); }
-.wheel-result{ min-height:34px; margin-bottom:6px; }
+.wheel-visual.wheel-lose{ animation: wheel-shake 0.4s ease; }
+.wheel-visual.wheel-win{ animation: wheel-pop 0.5s ease; }
+@keyframes wheel-shake{
+  0%, 100% { margin-left: 0; }
+  20% { margin-left: -8px; }
+  40% { margin-left: 8px; }
+  60% { margin-left: -5px; }
+  80% { margin-left: 5px; }
+}
+@keyframes wheel-pop{
+  0% { transform: scale(1); }
+  40% { transform: scale(1.25); }
+  100% { transform: scale(1); }
+}
+.wheel-result{ min-height:34px; margin-bottom:6px; font-weight:600; transition: color .15s ease; }
+.wheel-result-lose{ color: #f87171; }
+.wheel-result-win{ color: #4ade80; }
+.wheel-result-flat{ color: var(--muted); font-weight:400; }
 
 .active-booster-pill{
   display:inline-flex; align-items:center; gap:6px; background: var(--accent-soft);

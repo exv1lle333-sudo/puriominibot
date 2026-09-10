@@ -1025,7 +1025,7 @@ function renderSkins() {
       : `с ${s.min_level} ур.`;
     div.innerHTML = `
       ${s.locked ? `<div class="skin-lock">🔒</div>` : ""}
-      <svg viewBox="0 0 200 200"><use href="#dragon-svg"/></svg>
+      <img src="/static/img/dragon-hero.png" alt="">
       <div class="skin-name">${s.name}</div>
       <div class="skin-level-badge">${statusText}</div>
     `;
@@ -1345,17 +1345,33 @@ async function refreshWheelUI() {
 async function doWheelSpin(useFree) {
   haptic();
   const visual = document.getElementById("wheelVisual");
+  const resultEl = document.getElementById("wheelResult");
   visual.classList.add("spinning");
+  visual.classList.remove("wheel-win", "wheel-lose");
+  resultEl.className = "wheel-result muted small";
+  resultEl.textContent = "";
   document.getElementById("wheelFreeSpinBtn").disabled = true;
   document.getElementById("wheelPaidSpinBtn").disabled = true;
   try {
     const res = await api("/api/wheel/spin", { method: "POST", body: { use_free: useFree } });
     setTimeout(() => {
       visual.classList.remove("spinning");
+      const lost = res.multiplier === 0;
       const won = res.multiplier > 1;
       const flat = res.multiplier === 1;
-      document.getElementById("wheelResult").textContent =
-        `Выпало x${res.multiplier} → ${won ? "+" : (flat ? "" : "")}${fmtNum(res.payout)} ✦`;
+
+      if (lost) {
+        visual.classList.add("wheel-lose");
+        resultEl.className = "wheel-result wheel-result-lose";
+        resultEl.textContent = `Выпало x0 — пусто 😔 Попробуй ещё раз!`;
+      } else if (won) {
+        visual.classList.add("wheel-win");
+        resultEl.className = "wheel-result wheel-result-win";
+        resultEl.textContent = `🎉 Выпало x${res.multiplier} → +${fmtNum(res.payout)} ✦`;
+      } else {
+        resultEl.className = "wheel-result wheel-result-flat";
+        resultEl.textContent = `Выпало x${res.multiplier} → ставка вернулась (${fmtNum(res.payout)} ✦)`;
+      }
       haptic(won ? "success" : (flat ? "light" : "error"));
     }, 900);
     await loadState();
